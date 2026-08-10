@@ -6,6 +6,7 @@ enum MoreRoute: Hashable {
 
 struct MoreView: View {
     @EnvironmentObject var state: AppState
+    @EnvironmentObject var location: LocationProvider
 
     private var rows: [(MoreRoute, String, String)] {
         [
@@ -16,7 +17,7 @@ struct MoreView: View {
             (.addSpace,  "Add a prayer space",   "Help the next person find a room"),
             (.ramadan,   "Ramadan mode",         "Imsak, iftar and terawih nearby"),
             (.widgets,   "Widgets & Lock Screen","Next prayer and nearest space"),
-            (.location,  "Location",             SampleData.location),
+            (.location,  "Location",             location.areaName),
         ]
     }
 
@@ -71,8 +72,9 @@ struct MoreView: View {
     }
 }
 
-// Simple Location screen (More → Location).
+// Location screen (More → Location) — shows live location.
 struct LocationView: View {
+    @EnvironmentObject var location: LocationProvider
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Space.s6) {
@@ -80,10 +82,19 @@ struct LocationView: View {
                 ScreenTitle(title: "Location",
                             subtitle: "Used on device only — never uploaded.")
                 VStack(alignment: .leading, spacing: 8) {
-                    CapsLabel("Current area")
-                    Text(SampleData.location)
+                    HStack {
+                        CapsLabel("Current area")
+                        Spacer()
+                        CapsLabel(location.isReal ? "Live" : "Default",
+                                  color: location.isReal ? Palette.accent700 : Palette.mutedInk, size: 9)
+                    }
+                    Text(location.areaName)
                         .font(Font2.condensed(26))
                         .foregroundStyle(Palette.text)
+                    Text(String(format: "%.4f, %.4f", location.current.coordinate.latitude, location.current.coordinate.longitude))
+                        .font(Font2.body(12.5))
+                        .foregroundStyle(Palette.mutedInk)
+                        .monospacedDigit()
                     Text("Timings are identical island-wide; your area only affects how nearby spaces are sorted.")
                         .font(Font2.body(13))
                         .foregroundStyle(Palette.mutedInk)
@@ -92,7 +103,12 @@ struct LocationView: View {
                 .padding(Space.s4)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .blueprint()
-                GhostButton(title: "Set my location manually") {}
+
+                if !location.isReal {
+                    Text("Waiting for a location fix — allow location access in Settings if this stays on Default.")
+                        .font(Font2.body(12.5))
+                        .foregroundStyle(Palette.mutedInk)
+                }
             }
             .padding(.horizontal, Space.gutter)
             .padding(.bottom, Space.s8)

@@ -27,7 +27,7 @@ struct HomeView: View {
     private var hero: some View {
         VStack(alignment: .leading, spacing: Space.s4) {
             HStack(alignment: .top) {
-                CapsLabel(SampleData.location, color: Palette.accent400, size: 11)
+                CapsLabel(location.areaName, color: Palette.accent400, size: 11)
                 Spacer()
                 Text(state.hijriString)
                     .font(Font2.body(12))

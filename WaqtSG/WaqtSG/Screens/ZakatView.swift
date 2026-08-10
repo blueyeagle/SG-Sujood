@@ -3,12 +3,12 @@ import SwiftUI
 struct ZakatView: View {
     @EnvironmentObject var state: AppState
     @EnvironmentObject var nisab: NisabStore
+    @Environment(\.openURL) private var openURL
+    @State private var editing = false
 
-    // Illustrative holding (production: from the user's linked balances / manual entry).
-    private let lowestBalance: Double = 24_000
-
+    private var lowestBalance: Double { state.lowestBalance }
     private var aboveNisab: Bool { lowestBalance >= nisab.current.value }
-    private var zakatDue: Double { lowestBalance * 0.025 }
+    private var zakatDue: Double { state.zakatDue }
 
     var body: some View {
         ScrollView {
@@ -20,6 +20,7 @@ struct ZakatView: View {
         .background(Palette.bg)
         .ignoresSafeArea(edges: .top)
         .navigationBarBackButtonHidden(true)
+        .sheet(isPresented: $editing) { ZakatEditSheet() }
     }
 
     private var header: some View {
@@ -69,8 +70,10 @@ struct ZakatView: View {
             holding
             history
             VStack(spacing: Space.s3) {
-                PrimaryButton(title: "Pay zakat") {}
-                GhostButton(title: "Set a reminder for 25 August") {}
+                PrimaryButton(title: "Pay zakat") {
+                    if let url = URL(string: "https://pay.zakat.sg/") { openURL(url) }
+                }
+                GhostButton(title: "Set a reminder for \(state.longDate(state.haulEnd))") {}
             }
             Text("Figures are an estimate for planning. Confirm the current nisab and your zakat with MUIS before paying.")
                 .font(Font2.body(12))
@@ -88,7 +91,7 @@ struct ZakatView: View {
                 .font(Font2.condensed(36))
                 .foregroundStyle(Palette.text)
                 .monospacedDigit()
-            Text("Haul began 12 Rabiulawal 1447 · completes 25 August 2026")
+            Text("Haul began \(state.longDate(state.haulStartDate)) · completes \(state.longDate(state.haulEnd))")
                 .font(Font2.body(12.5))
                 .foregroundStyle(Palette.mutedInk)
             ProgressRail(fraction: state.haulFraction)
@@ -108,14 +111,19 @@ struct ZakatView: View {
 
     private var holding: some View {
         VStack(alignment: .leading, spacing: Space.s3) {
-            CapsLabel("Your holding")
+            HStack {
+                CapsLabel("Your holding")
+                Spacer()
+                Button { editing = true } label: { CapsLabel("Edit", color: Palette.accent700) }
+                    .buttonStyle(.plain)
+            }
             HStack(spacing: 0) {
                 cell(label: "Lowest balance", big: money(lowestBalance),
                      note: aboveNisab ? "Held above nisab all haul" : "Below nisab this haul",
                      tag: aboveNisab ? "Above nisab" : "Below nisab")
                 Rectangle().fill(Palette.divider).frame(width: 1)
                 cell(label: "Zakat at 2.5%", big: aboveNisab ? money(zakatDue) : "—",
-                     note: aboveNisab ? "Payable on 25 August" : "None due below nisab",
+                     note: aboveNisab ? "Payable on \(state.longDate(state.haulEnd))" : "None due below nisab",
                      tag: "Zakat harta")
             }
             .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))
@@ -169,5 +177,55 @@ struct ZakatView: View {
         f.numberStyle = .decimal
         f.maximumFractionDigits = 0
         return "$" + (f.string(from: NSNumber(value: v)) ?? "\(Int(v))")
+    }
+}
+
+// Editable, persisted zakat inputs: lowest balance + haul start. End of haul is derived.
+struct ZakatEditSheet: View {
+    @EnvironmentObject var state: AppState
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var balanceText = ""
+    @State private var haulStart = Date()
+
+    private var computedEnd: Date {
+        Calendar.current.date(byAdding: .day, value: state.haulTotalDays, to: haulStart) ?? haulStart
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Lowest balance held (SGD)") {
+                    TextField("e.g. 24000", text: $balanceText)
+                        .keyboardType(.decimalPad)
+                }
+                Section("Start of haul") {
+                    DatePicker("Haul began", selection: $haulStart, displayedComponents: .date)
+                    LabeledContent("End of haul", value: state.longDate(computedEnd))
+                    Text("End of haul is one lunar year (354 days) after the start.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Edit holding")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        let cleaned = balanceText.replacingOccurrences(of: ",", with: "")
+                            .replacingOccurrences(of: "$", with: "")
+                        if let v = Double(cleaned) { state.lowestBalance = v }
+                        state.haulStartDate = haulStart
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                balanceText = String(Int(state.lowestBalance))
+                haulStart = state.haulStartDate
+            }
+        }
     }
 }

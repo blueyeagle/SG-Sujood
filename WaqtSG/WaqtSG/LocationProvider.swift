@@ -11,8 +11,12 @@ final class LocationProvider: NSObject, ObservableObject, CLLocationManagerDeleg
     static let fallback = CLLocation(latitude: 1.304, longitude: 103.8318)  // Orchard
 
     private let manager = CLLocationManager()
+    private let geocoder = CLGeocoder()
+    private var lastGeocoded: CLLocation?
+
     @Published private(set) var current: CLLocation = LocationProvider.fallback
     @Published private(set) var isReal = false
+    @Published private(set) var areaName: String = "Orchard, Singapore"
 
     override init() {
         super.init()
@@ -29,6 +33,19 @@ final class LocationProvider: NSObject, ObservableObject, CLLocationManagerDeleg
         Task { @MainActor in
             self.current = loc
             self.isReal = true
+            self.reverseGeocodeIfNeeded(loc)
+        }
+    }
+
+    /// Reverse-geocode to a readable area name, throttled to ~200 m of movement.
+    private func reverseGeocodeIfNeeded(_ loc: CLLocation) {
+        if let last = lastGeocoded, loc.distance(from: last) < 200 { return }
+        lastGeocoded = loc
+        geocoder.reverseGeocodeLocation(loc) { [weak self] placemarks, _ in
+            guard let self, let p = placemarks?.first else { return }
+            let area = p.subLocality ?? p.locality ?? p.name ?? "Singapore"
+            let name = (p.country == "Singapore" || p.isoCountryCode == "SG") ? "\(area), Singapore" : area
+            Task { @MainActor in self.areaName = name }
         }
     }
 

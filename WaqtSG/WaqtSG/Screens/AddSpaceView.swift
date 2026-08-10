@@ -2,10 +2,45 @@ import SwiftUI
 
 struct AddSpaceView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @State private var building = ""
     @State private var floorLandmark = ""
     @State private var walkTime = ""
     @State private var type: SpaceType = .musollah
+
+    @State private var showMail = false
+    @State private var showNoMailAlert = false
+    @State private var showSubmitted = false
+
+    private let recipient = "suhaime.jcs@gmail.com"
+
+    private var mailSubject: String {
+        "New prayer space: \(building.isEmpty ? "(unnamed)" : building)"
+    }
+    private var mailBody: String {
+        """
+        A Waqt SG user submitted a prayer space for review:
+
+        Building / mall: \(building)
+        Floor & landmark: \(floorLandmark)
+        Walk from nearest MRT exit: \(walkTime)
+        Type: \(type.rawValue)
+
+        — Sent from Waqt SG
+        """
+    }
+
+    private func submit() {
+        if MailComposer.canSend {
+            showMail = true
+        } else if let url = MailFallback.url(to: recipient, subject: mailSubject, body: mailBody) {
+            openURL(url) { accepted in
+                if !accepted { showNoMailAlert = true }
+            }
+        } else {
+            showNoMailAlert = true
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -47,9 +82,11 @@ struct AddSpaceView: View {
                 .overlay(Rectangle().stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
                     .foregroundStyle(Palette.divider))
 
-                PrimaryButton(title: "Submit for review") { dismiss() }
+                PrimaryButton(title: "Submit for review") { submit() }
+                    .disabled(building.isEmpty)
+                    .opacity(building.isEmpty ? 0.5 : 1)
 
-                Text("A moderator checks new spaces within two days. You can confirm existing listings any time — that is what keeps the floor numbers right.")
+                Text("Your submission is emailed to the Waqt SG moderator, who checks new spaces within two days. You can confirm existing listings any time — that is what keeps the floor numbers right.")
                     .font(Font2.body(12))
                     .foregroundStyle(Palette.mutedInk)
                     .lineSpacing(2)
@@ -59,6 +96,23 @@ struct AddSpaceView: View {
         }
         .background(Palette.bg)
         .navigationBarBackButtonHidden(true)
+        .sheet(isPresented: $showMail) {
+            MailComposer(recipients: [recipient], subject: mailSubject, body: mailBody) {
+                showMail = false
+                showSubmitted = true
+            }
+            .ignoresSafeArea()
+        }
+        .alert("Submitted", isPresented: $showSubmitted) {
+            Button("Done") { dismiss() }
+        } message: {
+            Text("Thanks — your prayer space was sent to the moderator for review.")
+        }
+        .alert("No mail account", isPresented: $showNoMailAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Set up Mail on this device, or email the details to \(recipient).")
+        }
     }
 
     private func field(label: String, text: Binding<String>, placeholder: String) -> some View {

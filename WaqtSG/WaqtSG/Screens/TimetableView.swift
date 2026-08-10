@@ -2,13 +2,28 @@ import SwiftUI
 
 struct TimetableView: View {
     @EnvironmentObject var state: AppState
+    @State private var dayOffset = 0
+
+    private var selectedDate: Date {
+        Calendar.current.date(byAdding: .day, value: dayOffset, to: state.now) ?? state.now
+    }
+    private var isToday: Bool { dayOffset == 0 }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Space.s6) {
-                ScreenTitle(title: "Timetable",
-                            subtitle: "\(state.gregorianLong) · \(state.hijriString)")
-                    .padding(.top, 12)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("Timetable").font(Font2.condensed(34)).foregroundStyle(Palette.text)
+                        if !isToday {
+                            Button { dayOffset = 0 } label: { CapsLabel("Today", color: Palette.accent700) }
+                                .buttonStyle(.plain)
+                        }
+                    }
+                    Text("\(state.gregorianLong(selectedDate)) · \(state.hijriString(selectedDate))")
+                        .font(Font2.body(13)).foregroundStyle(Palette.mutedInk)
+                }
+                .padding(.top, 12)
 
                 sourceNote
 
@@ -21,8 +36,8 @@ struct TimetableView: View {
                 .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))
 
                 HStack(spacing: Space.s3) {
-                    GhostButton(title: "Yesterday") {}
-                    GhostButton(title: "Tomorrow") {}
+                    GhostButton(title: "‹ Yesterday") { dayOffset -= 1; state.expandedWaktu = nil }
+                    GhostButton(title: "Tomorrow ›") { dayOffset += 1; state.expandedWaktu = nil }
                 }
 
                 Text("Jumu'ah replaces Zohor on Friday — attend the khutbah at your nearest masjid.")
@@ -50,7 +65,7 @@ struct TimetableView: View {
 
     @ViewBuilder
     private func waktuRow(_ row: WaktuRow) -> some View {
-        let isNext = state.nextWaktuRow == row
+        let isNext = isToday && state.nextWaktuRow == row
         let expanded = state.expandedWaktu == row
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .center, spacing: Space.s3) {
@@ -63,7 +78,7 @@ struct TimetableView: View {
                         .foregroundStyle(Palette.mutedInk)
                 }
                 Spacer()
-                Text(state.clockString(for: row))
+                Text(state.clockString(for: state.time(for: row, on: selectedDate)))
                     .font(Font2.condensed(22))
                     .foregroundStyle(isNext ? Palette.accent : Palette.text)
                     .monospacedDigit()

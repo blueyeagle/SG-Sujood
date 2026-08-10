@@ -40,16 +40,28 @@ final class AppState: ObservableObject {
     @Published var dzikirCount: Int = 0
     @Published var dzikirRounds: Int = 0
 
-    // Zakat — haul countdown
-    // Haul began 12 Rabiulawal 1447; completes 25 August 2026 (per prototype).
-    let haulStart = AppState.makeDate(2025, 9, 5)      // ~ start
-    let haulEnd   = AppState.makeDate(2026, 8, 25)     // completion
-    let haulDay   = 339
-    let haulTotalDays = 354
+    // Zakat — user-configurable, persisted to UserDefaults.
+    let haulTotalDays = 354   // one lunar (Hijri) year
+    private static let kBalance = "zakat.lowestBalance"
+    private static let kHaulStart = "zakat.haulStart"
+
+    @Published var lowestBalance: Double {
+        didSet { UserDefaults.standard.set(lowestBalance, forKey: Self.kBalance) }
+    }
+    @Published var haulStartDate: Date {
+        didSet { UserDefaults.standard.set(haulStartDate.timeIntervalSince1970, forKey: Self.kHaulStart) }
+    }
 
     private var timer: AnyCancellable?
 
     init() {
+        let d = UserDefaults.standard
+        lowestBalance = d.object(forKey: Self.kBalance) as? Double ?? 24_000
+        if let ts = d.object(forKey: Self.kHaulStart) as? Double {
+            haulStartDate = Date(timeIntervalSince1970: ts)
+        } else {
+            haulStartDate = AppState.makeDate(2025, 9, 5)   // default seed
+        }
         start()
     }
 
@@ -96,22 +108,24 @@ final class AppState: ObservableObject {
     // MARK: - Dates
 
     /// "Monday 10 August 2026"
-    var gregorianLong: String {
+    var gregorianLong: String { gregorianLong(now) }
+    func gregorianLong(_ date: Date) -> String {
         let f = DateFormatter()
         f.dateFormat = "EEEE d MMMM yyyy"
-        return f.string(from: now)
+        return f.string(from: date)
     }
 
     /// Hijri date as computed (Umm al-Qura). Note: MUIS uses an observed calendar,
     /// so this can differ by ±1 day — treat as indicative until wired to MUIS.
-    var hijriString: String {
+    var hijriString: String { hijriString(now) }
+    func hijriString(_ date: Date) -> String {
         var cal = Calendar(identifier: .islamicUmmAlQura)
         cal.locale = Locale(identifier: "en")
         let f = DateFormatter()
         f.calendar = cal
         f.locale = Locale(identifier: "en")
         f.dateFormat = "d MMMM yyyy"
-        return f.string(from: now)
+        return f.string(from: date)
     }
 
     /// Imsak ≈ 10 minutes before Subuh.
@@ -237,7 +251,18 @@ final class AppState: ObservableObject {
         dzikirCount = 0
     }
 
-    // MARK: - Zakat haul countdown
+    // MARK: - Zakat haul countdown (derived from haulStartDate)
+
+    /// End of haul = start + one lunar year.
+    var haulEnd: Date {
+        Calendar.current.date(byAdding: .day, value: haulTotalDays, to: haulStartDate) ?? haulStartDate
+    }
+    /// Days elapsed since the haul began (clamped to the year).
+    var haulDay: Int {
+        let days = Calendar.current.dateComponents([.day], from: haulStartDate, to: now).day ?? 0
+        return max(0, min(haulTotalDays, days))
+    }
+    var zakatDue: Double { lowestBalance * 0.025 }
 
     var haulCountdown: String {
         let secs = max(0, Int(haulEnd.timeIntervalSince(now)))
@@ -249,6 +274,12 @@ final class AppState: ObservableObject {
     }
 
     var haulFraction: Double { Double(haulDay) / Double(haulTotalDays) }
+
+    /// "25 August 2026"
+    func longDate(_ date: Date) -> String {
+        let f = DateFormatter(); f.dateFormat = "d MMMM yyyy"
+        return f.string(from: date)
+    }
 
     // MARK: - Helpers
 
