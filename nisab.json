@@ -1,0 +1,17 @@
+{
+  "_note": "Bundled seed / schema reference. MUIS publishes nisab MONTHLY on zakat.sg. Host a file with this shape at NisabStore.remoteURL to update without an app release. 'value' is SGD (86 g gold). Add each new month to the top of 'history' and set it as 'current'.",
+  "source": "https://www.zakat.sg/current-past-nisab-values/",
+  "updated": "2026-05-01",
+  "current": {
+    "value": 17017,
+    "month": "May 2026",
+    "effectiveFrom": "2026-05-01"
+  },
+  "history": [
+    {
+      "value": 17017,
+      "month": "May 2026",
+      "effectiveFrom": "2026-05-01"
+    }
+  ]
+}
