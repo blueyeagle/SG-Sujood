@@ -5,6 +5,7 @@ struct ZakatView: View {
     @EnvironmentObject var nisab: NisabStore
     @Environment(\.openURL) private var openURL
     @State private var editing = false
+    @State private var reminderAlert: String?
 
     private var lowestBalance: Double { state.lowestBalance }
     private var aboveNisab: Bool { lowestBalance >= nisab.current.value }
@@ -21,6 +22,11 @@ struct ZakatView: View {
         .ignoresSafeArea(edges: .top)
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $editing) { ZakatEditSheet() }
+        .alert("Reminder", isPresented: .constant(reminderAlert != nil)) {
+            Button("OK") { reminderAlert = nil }
+        } message: {
+            Text(reminderAlert ?? "")
+        }
     }
 
     private var header: some View {
@@ -73,7 +79,19 @@ struct ZakatView: View {
                 PrimaryButton(title: "Pay zakat") {
                     if let url = URL(string: "https://pay.zakat.sg/") { openURL(url) }
                 }
-                GhostButton(title: "Set a reminder for \(state.longDate(state.haulEnd))") {}
+                GhostButton(title: "Set a reminder for \(state.longDate(state.haulEnd))") {
+                    let due = state.haulEnd
+                    Notifications.schedule(
+                        id: "zakat-due",
+                        title: "Zakat is due",
+                        body: "Your haul completes today. Estimated zakat: \(money(state.zakatDue)). Confirm and pay via MUIS.",
+                        at: Notifications.morningOf(due)
+                    ) { ok in
+                        reminderAlert = ok
+                            ? "We'll remind you on the morning of \(state.longDate(due))."
+                            : "Couldn't set the reminder — enable notifications for Waqt SG in Settings."
+                    }
+                }
             }
             Text("Figures are an estimate for planning. Confirm the current nisab and your zakat with MUIS before paying.")
                 .font(Font2.body(12))

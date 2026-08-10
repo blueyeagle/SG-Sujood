@@ -104,6 +104,20 @@ enum SampleData {
         TerawihEntry(mosque: "Masjid Sultan",   detail: "8 rakaat · 8.15 pm",  walkMinutes: 14),
     ]
 
+    // Ramadan intentions & du'a (Shafi'i, as commonly practised in Singapore).
+    // Have wording reviewed by a religious authority before shipping; consider adding Arabic script.
+    static let ramadanNiat: [Niat] = [
+        Niat(title: "Daily fast · nightly intention",
+             transliteration: "Nawaitu sauma ghadin 'an adaa'i fardhi syahri Ramadhaana haadzihis sanati lillaahi ta'aala.",
+             meaning: "I intend to fast tomorrow to fulfil the obligation of the month of Ramadan this year, for Allah Ta'ala."),
+        Niat(title: "Whole month · first night",
+             transliteration: "Nawaitu sauma jamii'i syahri Ramadhaana haadzihis sanati lillaahi ta'aala.",
+             meaning: "I intend to fast the entire month of Ramadan this year, for Allah Ta'ala — a recommended intention on the first night, made alongside the nightly niat."),
+        Niat(title: "Breaking fast · doa berbuka",
+             transliteration: "Allaahumma laka sumtu wa bika aamantu wa 'alaa rizqika aftartu, birahmatika yaa arhamar raahimiin.",
+             meaning: "O Allah, for You I fasted, in You I believe, and with Your provision I break my fast; by Your mercy, O Most Merciful of the merciful."),
+    ]
+
     // MARK: - Qibla
 
     static let qiblaBearing: Double = 293   // degrees from true north, Singapore → Makkah

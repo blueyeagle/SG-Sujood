@@ -70,6 +70,15 @@ enum SpaceType: String, CaseIterable, Codable {
     case prayerRoom = "Prayer room"
 }
 
+// MARK: - Niat / du'a (transliteration + meaning)
+
+struct Niat: Identifiable {
+    let id = UUID()
+    let title: String
+    let transliteration: String
+    let meaning: String
+}
+
 // MARK: - Terawih (Ramadan)
 
 struct TerawihEntry: Identifiable {

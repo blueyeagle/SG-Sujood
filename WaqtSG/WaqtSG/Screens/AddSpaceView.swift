@@ -8,37 +8,41 @@ struct AddSpaceView: View {
     @State private var walkTime = ""
     @State private var type: SpaceType = .musollah
 
-    @State private var showMail = false
-    @State private var showNoMailAlert = false
     @State private var showSubmitted = false
+    @State private var showFailAlert = false
 
-    private let recipient = "suhaime.jcs@gmail.com"
+    // Submissions are logged to "Prayer Space for Review.xlsx" in the repo. The app opens a
+    // prefilled GitHub issue (no secret token in the app); a GitHub Action parses it and
+    // appends a row to the workbook. Requires the user to be signed in to GitHub.
+    private let repoSlug = "blueyeagle/SG-Sujood"
 
-    private var mailSubject: String {
-        "New prayer space: \(building.isEmpty ? "(unnamed)" : building)"
+    private var issueTitle: String {
+        "[Space] \(building.isEmpty ? "(unnamed)" : building)"
     }
-    private var mailBody: String {
+    private var issueBody: String {
         """
-        A Waqt SG user submitted a prayer space for review:
-
         Building / mall: \(building)
         Floor & landmark: \(floorLandmark)
         Walk from nearest MRT exit: \(walkTime)
         Type: \(type.rawValue)
 
-        — Sent from Waqt SG
+        _Submitted from Waqt SG — a moderator will review before it's added._
         """
     }
 
+    private func githubIssueURL() -> URL? {
+        var comps = URLComponents(string: "https://github.com/\(repoSlug)/issues/new")
+        comps?.queryItems = [
+            URLQueryItem(name: "title", value: issueTitle),
+            URLQueryItem(name: "body", value: issueBody),
+        ]
+        return comps?.url
+    }
+
     private func submit() {
-        if MailComposer.canSend {
-            showMail = true
-        } else if let url = MailFallback.url(to: recipient, subject: mailSubject, body: mailBody) {
-            openURL(url) { accepted in
-                if !accepted { showNoMailAlert = true }
-            }
-        } else {
-            showNoMailAlert = true
+        guard let url = githubIssueURL() else { showFailAlert = true; return }
+        openURL(url) { accepted in
+            if accepted { showSubmitted = true } else { showFailAlert = true }
         }
     }
 
@@ -86,7 +90,7 @@ struct AddSpaceView: View {
                     .disabled(building.isEmpty)
                     .opacity(building.isEmpty ? 0.5 : 1)
 
-                Text("Your submission is emailed to the Waqt SG moderator, who checks new spaces within two days. You can confirm existing listings any time — that is what keeps the floor numbers right.")
+                Text("Submitting opens a prefilled entry on GitHub — tap “Submit new issue” there to log it to the moderator's review workbook. A moderator checks new spaces within two days.")
                     .font(Font2.body(12))
                     .foregroundStyle(Palette.mutedInk)
                     .lineSpacing(2)
@@ -96,22 +100,15 @@ struct AddSpaceView: View {
         }
         .background(Palette.bg)
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: $showMail) {
-            MailComposer(recipients: [recipient], subject: mailSubject, body: mailBody) {
-                showMail = false
-                showSubmitted = true
-            }
-            .ignoresSafeArea()
-        }
-        .alert("Submitted", isPresented: $showSubmitted) {
+        .alert("Opening GitHub", isPresented: $showSubmitted) {
             Button("Done") { dismiss() }
         } message: {
-            Text("Thanks — your prayer space was sent to the moderator for review.")
+            Text("Tap “Submit new issue” on the page that just opened to log your space to the review workbook.")
         }
-        .alert("No mail account", isPresented: $showNoMailAlert) {
+        .alert("Couldn't open", isPresented: $showFailAlert) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Set up Mail on this device, or email the details to \(recipient).")
+            Text("Could not open the submission page. Check your connection and try again.")
         }
     }
 

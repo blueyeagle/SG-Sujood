@@ -1,0 +1,62 @@
+name: Prayer space submission
+
+# When a "[Space] …" issue is opened (from the Waqt SG app), append it to the review
+# workbook and close the issue. Uses the built-in GITHUB_TOKEN — no secrets required.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  append:
+    if: startsWith(github.event.issue.title, '[Space]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install openpyxl
+
+      - name: Append submission to workbook
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_CREATED: ${{ github.event.issue.created_at }}
+        run: python .github/scripts/append_space.py
+
+      - name: Commit workbook
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "Prayer Space for Review.xlsx"
+          if git diff --cached --quiet; then
+            echo "No workbook change."
+          else
+            git commit -m "Log prayer space submission from issue #${{ github.event.issue.number }}"
+            git push
+          fi
+
+      - name: Acknowledge and close the issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "Thanks — logged to **Prayer Space for Review.xlsx** for moderation. Closing this submission."
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: "closed"
+            });

@@ -281,6 +281,38 @@ final class AppState: ObservableObject {
         return f.string(from: date)
     }
 
+    // MARK: - Ramadan (Hijri, Umm al-Qura — indicative; MUIS observes the moon)
+
+    struct RamadanInfo {
+        let isRamadan: Bool
+        let hijriYear: Int
+        let dayOfRamadan: Int   // 1...30 when in Ramadan, else 0
+        let daysToNext: Int     // 0 when in Ramadan
+        let start: Date         // 1 Ramadan
+        let end: Date           // 1 Syawal (Hari Raya)
+    }
+
+    var ramadan: RamadanInfo {
+        var cal = Calendar(identifier: .islamicUmmAlQura)
+        cal.locale = Locale(identifier: "en")
+        let c = cal.dateComponents([.year, .month, .day], from: now)
+        let hy = c.year ?? 1448, hm = c.month ?? 1, hd = c.day ?? 1
+
+        func firstOf(month: Int, year: Int) -> Date {
+            cal.date(from: DateComponents(year: year, month: month, day: 1)) ?? now
+        }
+
+        let isRamadan = (hm == 9)
+        let startYear: Int = (hm <= 9) ? hy : hy + 1   // upcoming (or current) Ramadan
+        let start = firstOf(month: 9, year: startYear)
+        let end = firstOf(month: 10, year: startYear)  // 1 Syawal
+        let daysToNext = isRamadan ? 0 : max(0, cal.dateComponents([.day], from: now, to: start).day ?? 0)
+
+        return RamadanInfo(isRamadan: isRamadan, hijriYear: startYear,
+                           dayOfRamadan: isRamadan ? hd : 0,
+                           daysToNext: daysToNext, start: start, end: end)
+    }
+
     // MARK: - Helpers
 
     static func makeDate(_ y: Int, _ mo: Int, _ d: Int) -> Date {
