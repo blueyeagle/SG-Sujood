@@ -6,6 +6,7 @@ struct WaqtSGApp: App {
     @StateObject private var nisab = NisabStore()
     @StateObject private var spacesStore = SpacesStore()
     @StateObject private var location = LocationProvider()
+    @StateObject private var routes = RouteService()
 
     init() { FontRegistrar.register() }
 
@@ -24,6 +25,7 @@ struct WaqtSGApp: App {
             .environmentObject(nisab)
             .environmentObject(spacesStore)
             .environmentObject(location)
+            .environmentObject(routes)
             .tint(Palette.accent)
             .preferredColorScheme(.light)   // The design is authored on a light technical ground.
             .task {

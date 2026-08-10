@@ -5,9 +5,11 @@ import CoreLocation
 struct SpaceDetailView: View {
     @EnvironmentObject var state: AppState
     @EnvironmentObject var location: LocationProvider
+    @EnvironmentObject var routes: RouteService
     let space: SpaceRecord
 
     private var metres: CLLocationDistance? { space.location?.distance(from: location.current) }
+    private var routedMinutes: Int? { routes.routed(space.id, from: location.current.coordinate) }
 
     var body: some View {
         ScrollView {
@@ -27,6 +29,11 @@ struct SpaceDetailView: View {
         .background(Palette.bg)
         .ignoresSafeArea(edges: .top)
         .navigationBarBackButtonHidden(true)
+        .task {
+            if let c = space.coordinate {
+                routes.request(space.id, from: location.current.coordinate, to: c)
+            }
+        }
     }
 
     private var imageBand: some View {
@@ -69,10 +76,20 @@ struct SpaceDetailView: View {
                  note: space.floor ?? space.address ?? "")
             Rectangle().fill(Palette.divider).frame(width: 1)
             cell(label: "Walk",
-                 big: metres.map { $0 >= 2000 ? String(format: "%.1f km", $0/1000) : "\(Walk.minutes($0)) min" } ?? "—",
-                 note: location.isReal ? "From your location" : "From Orchard (allow location)")
+                 big: walkBig,
+                 note: walkNote)
         }
         .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))
+    }
+
+    private var walkBig: String {
+        if let r = routedMinutes { return "\(r) min" }
+        guard let m = metres else { return "—" }
+        return m >= 2000 ? String(format: "%.1f km", m/1000) : "\(Walk.minutes(m)) min"
+    }
+    private var walkNote: String {
+        let origin = location.isReal ? "from your location" : "from Orchard"
+        return routedMinutes != nil ? "Walking route \(origin)" : "Straight-line \(origin)"
     }
 
     private var shortFloor: String? {

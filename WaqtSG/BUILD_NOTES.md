@@ -80,8 +80,14 @@ the "SG Prayer Spaces" workbook and **geocoded via OneMap** (Singapore's officia
 the directory by editing `spaces.json` and re-pushing — no App Store release.
 
 To refresh the directory from a new workbook, re-run the parser/geocoder
-(`scratchpad/build_spaces.py` pattern) and replace `spaces.json`. Note walking times are
-straight-line estimates, not routed; wire MapKit `MKDirections` for door-to-door minutes.
+(`scratchpad/build_spaces.py` pattern) and replace `spaces.json`.
+
+**Walking times are routed** via `RouteService` (MapKit `MKDirections`, transport `.walking`).
+Apple throttles Directions, so routes are computed on demand — the Space detail (1 request)
+and the nearest ~10 rows in Nearby — through a serial, cached queue; every other row shows
+the instant straight-line estimate (metres ÷ 80) until/unless routed. The Nearby list stays
+sorted by straight-line distance for stable ordering, so a routed row can occasionally read
+out of numeric order (that's deliberate — routes arrive asynchronously).
 
 The rest is still placeholder per the handoff's "Content caveats". Before shipping:
 

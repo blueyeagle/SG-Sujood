@@ -6,6 +6,7 @@ struct NearbyView: View {
     @EnvironmentObject var state: AppState
     @EnvironmentObject var spaces: SpacesStore
     @EnvironmentObject var location: LocationProvider
+    @EnvironmentObject var routes: RouteService
 
     @State private var camera: MapCameraPosition = .automatic
     @State private var groupByRegion = true
@@ -110,6 +111,8 @@ struct NearbyView: View {
         .background(Palette.bg)
         .navigationDestination(for: SpaceRecord.self) { SpaceDetailView(space: $0) }
         .navigationDestination(for: NearbyRoute.self) { _ in AddSpaceView() }
+        .task { requestNearestRoutes() }
+        .onChange(of: state.spaceFilter) { _, _ in requestNearestRoutes() }
     }
 
     private var map: some View {
@@ -156,12 +159,14 @@ struct NearbyView: View {
             }
             Spacer()
             VStack(alignment: .trailing, spacing: -2) {
-                if let metres {
+                if let routed = routes.routed(s.id, from: location.current.coordinate) {
+                    Text("\(routed)")
+                        .font(Font2.condensed(30)).foregroundStyle(Palette.text).monospacedDigit()
+                    CapsLabel("min walk", size: 9)          // routed via MapKit
+                } else if let metres {
                     Text(metres >= 2000 ? String(format: "%.1f", metres/1000) : "\(Walk.minutes(metres))")
-                        .font(Font2.condensed(30))
-                        .foregroundStyle(Palette.text)
-                        .monospacedDigit()
-                    CapsLabel(metres >= 2000 ? "km" : "min walk", size: 9)
+                        .font(Font2.condensed(30)).foregroundStyle(Palette.text).monospacedDigit()
+                    CapsLabel(metres >= 2000 ? "km" : "min", size: 9)   // straight-line estimate
                 } else {
                     CapsLabel(s.region, size: 9)
                 }
@@ -170,6 +175,15 @@ struct NearbyView: View {
         .padding(.horizontal, Space.s4)
         .padding(.vertical, 14)
         .contentShape(Rectangle())
+    }
+
+    private func requestNearestRoutes() {
+        let origin = location.current.coordinate
+        let items = sorted.prefix(10).compactMap { s -> (id: String, to: CLLocationCoordinate2D)? in
+            guard let c = s.coordinate else { return nil }
+            return (s.id, c)
+        }
+        routes.requestMany(items, from: origin)
     }
 
     private func metaLine(_ s: SpaceRecord) -> String? {
