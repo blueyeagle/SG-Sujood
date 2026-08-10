@@ -1,22 +1,26 @@
 {
-  "_note": "Bundled seed / schema reference. MUIS publishes nisab MONTHLY on zakat.sg. Host a file with this shape at NisabStore.remoteURL to update without an app release. 'value' is SGD (86 g gold). Add each new month to the top of 'history' and set it as 'current'.",
+  "_note": "Bundled seed / schema reference. MUIS publishes nisab MONTHLY on zakat.sg. Host a file with this shape at NisabStore.remoteURL to update without an app release. 'value' is SGD (86 g gold). Add each new month to the top of 'history' and set it as 'current'. Source table: https://www.zakat.sg/current-past-nisab-values/ (2025/2026).",
   "source": "https://www.zakat.sg/current-past-nisab-values/",
-  "updated": "2026-08-01",
+  "updated": "2026-08-10",
   "current": {
     "value": 14887,
     "month": "August 2026",
     "effectiveFrom": "2026-08-01"
   },
   "history": [
-    {
-      "value": 14887,
-      "month": "August 2026",
-      "effectiveFrom": "2026-08-01"
-    },
-    {
-      "value": 17017,
-      "month": "May 2026",
-      "effectiveFrom": "2026-05-01"
-    }
+    { "value": 14887, "month": "August 2026",    "effectiveFrom": "2026-08-01" },
+    { "value": 15433, "month": "July 2026",      "effectiveFrom": "2026-07-01" },
+    { "value": 16548, "month": "June 2026",      "effectiveFrom": "2026-06-01" },
+    { "value": 17017, "month": "May 2026",       "effectiveFrom": "2026-05-01" },
+    { "value": 17642, "month": "April 2026",     "effectiveFrom": "2026-04-01" },
+    { "value": 17989, "month": "March 2026",     "effectiveFrom": "2026-03-01" },
+    { "value": 17230, "month": "February 2026",  "effectiveFrom": "2026-02-01" },
+    { "value": 15750, "month": "January 2026",   "effectiveFrom": "2026-01-01" },
+    { "value": 15079, "month": "December 2025",  "effectiveFrom": "2025-12-01" },
+    { "value": 14871, "month": "November 2025",  "effectiveFrom": "2025-11-01" },
+    { "value": 13331, "month": "October 2025",   "effectiveFrom": "2025-10-01" },
+    { "value": 12204, "month": "September 2025", "effectiveFrom": "2025-09-01" },
+    { "value": 12041, "month": "August 2025",    "effectiveFrom": "2025-08-01" },
+    { "value": 12100, "month": "July 2025",      "effectiveFrom": "2025-07-01" }
   ]
 }
