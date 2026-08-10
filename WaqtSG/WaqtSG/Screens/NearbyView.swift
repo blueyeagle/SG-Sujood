@@ -8,9 +8,23 @@ struct NearbyView: View {
     @EnvironmentObject var location: LocationProvider
 
     @State private var camera: MapCameraPosition = .automatic
+    @State private var groupByRegion = true
 
     private var sorted: [SpaceRecord] {
         spaces.sortedByDistance(from: location.current, filter: state.spaceFilter)
+    }
+
+    /// Regions ordered by their nearest member (because `sorted` is distance-sorted),
+    /// each region's spaces kept in distance order.
+    private var grouped: [(region: String, spaces: [SpaceRecord])] {
+        var byRegion: [String: [SpaceRecord]] = [:]
+        var order: [String] = []
+        for s in sorted {
+            let r = s.region.isEmpty ? "Other" : s.region
+            if byRegion[r] == nil { byRegion[r] = []; order.append(r) }
+            byRegion[r]!.append(s)
+        }
+        return order.map { ($0, byRegion[$0]!) }
     }
 
     var body: some View {
@@ -35,6 +49,14 @@ struct NearbyView: View {
                     Spacer()
                 }
 
+                // Sort: distance-flat vs grouped by region
+                HStack(spacing: Space.s2) {
+                    CapsLabel("Sort", size: 10)
+                    FilterButton(title: "Distance", selected: !groupByRegion) { groupByRegion = false }
+                    FilterButton(title: "Region",   selected: groupByRegion)  { groupByRegion = true }
+                    Spacer()
+                }
+
                 map
 
                 if !location.isReal {
@@ -43,14 +65,34 @@ struct NearbyView: View {
                         .foregroundStyle(Palette.mutedInk)
                 }
 
-                LazyVStack(spacing: 0) {
-                    ForEach(Array(sorted.enumerated()), id: \.element.id) { idx, s in
-                        if idx > 0 { Hairline() }
-                        NavigationLink(value: s) { spaceRow(s) }
-                            .buttonStyle(.plain)
+                if groupByRegion {
+                    ForEach(grouped, id: \.region) { group in
+                        VStack(alignment: .leading, spacing: Space.s3) {
+                            HStack {
+                                CapsLabel(group.region)
+                                Spacer()
+                                CapsLabel("\(group.spaces.count)", size: 10)
+                            }
+                            LazyVStack(spacing: 0) {
+                                ForEach(Array(group.spaces.enumerated()), id: \.element.id) { idx, s in
+                                    if idx > 0 { Hairline() }
+                                    NavigationLink(value: s) { spaceRow(s) }
+                                        .buttonStyle(.plain)
+                                }
+                            }
+                            .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))
+                        }
                     }
+                } else {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(sorted.enumerated()), id: \.element.id) { idx, s in
+                            if idx > 0 { Hairline() }
+                            NavigationLink(value: s) { spaceRow(s) }
+                                .buttonStyle(.plain)
+                        }
+                    }
+                    .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))
                 }
-                .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))
 
                 NavigationLink(value: NearbyRoute.addSpace) {
                     Text("Add a space you know")
