@@ -11,16 +11,31 @@ struct NearbyView: View {
     @State private var camera: MapCameraPosition = .automatic
     @State private var groupByRegion = true
 
+    /// Straight-line order — the stable base used for routing (nearest N) and map pins.
     private var sorted: [SpaceRecord] {
         spaces.sortedByDistance(from: location.current, filter: state.spaceFilter)
     }
 
-    /// Regions ordered by their nearest member (because `sorted` is distance-sorted),
-    /// each region's spaces kept in distance order.
+    /// Effective minutes: routed walking time when known, else the straight-line estimate.
+    private func effMinutes(_ s: SpaceRecord) -> Int {
+        if let r = routes.routed(s.id, from: location.current.coordinate) { return r }
+        if let m = s.location?.distance(from: location.current) { return Walk.minutes(m) }
+        return Int.max
+    }
+
+    /// Display order — re-sorted by effective (routed-when-available) time, stable on ties.
+    private var displaySorted: [SpaceRecord] {
+        sorted.enumerated().sorted {
+            let a = effMinutes($0.element), b = effMinutes($1.element)
+            return a != b ? a < b : $0.offset < $1.offset
+        }.map(\.element)
+    }
+
+    /// Regions ordered by their nearest member, each region in display (routed) order.
     private var grouped: [(region: String, spaces: [SpaceRecord])] {
         var byRegion: [String: [SpaceRecord]] = [:]
         var order: [String] = []
-        for s in sorted {
+        for s in displaySorted {
             let r = s.region.isEmpty ? "Other" : s.region
             if byRegion[r] == nil { byRegion[r] = []; order.append(r) }
             byRegion[r]!.append(s)
@@ -86,7 +101,7 @@ struct NearbyView: View {
                     }
                 } else {
                     LazyVStack(spacing: 0) {
-                        ForEach(Array(sorted.enumerated()), id: \.element.id) { idx, s in
+                        ForEach(Array(displaySorted.enumerated()), id: \.element.id) { idx, s in
                             if idx > 0 { Hairline() }
                             NavigationLink(value: s) { spaceRow(s) }
                                 .buttonStyle(.plain)
@@ -107,6 +122,7 @@ struct NearbyView: View {
             }
             .padding(.horizontal, Space.gutter)
             .padding(.bottom, Space.s8)
+            .animation(.easeInOut(duration: 0.25), value: routes.minutes)
         }
         .background(Palette.bg)
         .navigationDestination(for: SpaceRecord.self) { SpaceDetailView(space: $0) }
