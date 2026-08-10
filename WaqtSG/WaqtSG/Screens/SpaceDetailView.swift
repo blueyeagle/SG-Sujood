@@ -1,21 +1,24 @@
 import SwiftUI
 import MapKit
+import CoreLocation
 
 struct SpaceDetailView: View {
     @EnvironmentObject var state: AppState
-    let space: PrayerSpace
+    @EnvironmentObject var location: LocationProvider
+    let space: SpaceRecord
+
+    private var metres: CLLocationDistance? { space.location?.distance(from: location.current) }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Space.s6) {
                 imageBand
-
                 VStack(alignment: .leading, spacing: Space.s6) {
                     header
                     whereWalkGrid
-                    gettingThere
+                    details
                     actions
-                    footer
+                    if let notes = space.notes { footer(notes) }
                 }
                 .padding(.horizontal, Space.gutter)
             }
@@ -32,10 +35,11 @@ struct SpaceDetailView: View {
                 .frame(height: 190 + 60)
                 .clipped()
                 .overlay(alignment: .center) {
-                    Text("photo of the \(space.type.rawValue.lowercased()) entrance\n(community submitted)")
+                    Text(space.isMosque ? space.name : "photo of the \(space.type.lowercased()) entrance\n(community submitted)")
                         .font(Font2.body(12))
                         .multilineTextAlignment(.center)
                         .foregroundStyle(Palette.mutedInk)
+                        .padding(.horizontal, 40)
                 }
             BackHeader()
                 .padding(.leading, Space.gutter)
@@ -45,31 +49,48 @@ struct SpaceDetailView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            CapsLabel(space.type.rawValue, color: Palette.accent700)
+            CapsLabel(space.isMosque ? "Masjid" : space.type, color: Palette.accent700)
             Text(space.name)
                 .font(Font2.condensed(32))
                 .foregroundStyle(Palette.text)
-            Text("\(space.address) · \(space.closing)")
-                .font(Font2.body(14))
-                .foregroundStyle(Palette.mutedInk)
+                .fixedSize(horizontal: false, vertical: true)
+            if let addr = space.address {
+                Text(addr)
+                    .font(Font2.body(14))
+                    .foregroundStyle(Palette.mutedInk)
+            }
         }
     }
 
     private var whereWalkGrid: some View {
         HStack(spacing: 0) {
-            cell(label: "Where", big: space.floorBadge, note: space.landmarkSentence)
+            cell(label: "Where",
+                 big: space.isMosque ? space.region : (shortFloor ?? space.region),
+                 note: space.floor ?? space.address ?? "")
             Rectangle().fill(Palette.divider).frame(width: 1)
-            cell(label: "Walk", big: "\(space.walkMinutes) min", note: space.originFrom)
+            cell(label: "Walk",
+                 big: metres.map { $0 >= 2000 ? String(format: "%.1f km", $0/1000) : "\(Walk.minutes($0)) min" } ?? "—",
+                 note: location.isReal ? "From your location" : "From Orchard (allow location)")
         }
         .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))
+    }
+
+    private var shortFloor: String? {
+        guard let f = space.floor else { return nil }
+        // first token like "L7", "B1", "B4" if present
+        if let m = f.range(of: #"^[LB]?\d+"#, options: .regularExpression) {
+            return String(f[m])
+        }
+        return f.count <= 4 ? f : nil
     }
 
     private func cell(label: String, big: String, note: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             CapsLabel(label)
-            Text(big)
-                .font(Font2.condensed(30))
+            Text(big.isEmpty ? "—" : big)
+                .font(Font2.condensed(28))
                 .foregroundStyle(Palette.text)
+                .fixedSize(horizontal: false, vertical: true)
             Text(note)
                 .font(Font2.body(12.5))
                 .foregroundStyle(Palette.mutedInk)
@@ -80,50 +101,62 @@ struct SpaceDetailView: View {
         .frame(maxWidth: .infinity, minHeight: 130, alignment: .topLeading)
     }
 
-    private var gettingThere: some View {
+    private var details: some View {
         VStack(alignment: .leading, spacing: Space.s3) {
-            CapsLabel("Getting there")
-            HStack(alignment: .top, spacing: Space.s3) {
-                Rectangle().fill(Palette.divider).frame(width: 1)
-                VStack(alignment: .leading, spacing: Space.s4) {
-                    ForEach(Array(space.steps.enumerated()), id: \.offset) { _, step in
-                        HStack(alignment: .top, spacing: Space.s3) {
-                            AccentSquare().padding(.top, 5)
-                            Text(step)
-                                .font(Font2.body(14))
-                                .foregroundStyle(Palette.text)
-                                .lineSpacing(2)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
+            CapsLabel("Details")
+            VStack(spacing: 0) {
+                let items = detailItems
+                ForEach(Array(items.enumerated()), id: \.offset) { idx, item in
+                    if idx > 0 { Hairline() }
+                    HStack(alignment: .top) {
+                        CapsLabel(item.0, size: 10)
+                            .frame(width: 120, alignment: .leading)
+                        Text(item.1)
+                            .font(Font2.body(13.5))
+                            .foregroundStyle(Palette.text)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
+                    .padding(.vertical, 11)
                 }
             }
-            .padding(.leading, 2)
+            .padding(.horizontal, Space.s4)
+            .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))
         }
+    }
+
+    private var detailItems: [(String, String)] {
+        var items: [(String, String)] = []
+        if let f = space.facilities { items.append(("Facilities", f)) }
+        if let g = space.genderSegregated { items.append(("Gender", g ? "Separate male / female areas" : "Shared / not segregated")) }
+        if let a = space.access { items.append(("Access", a)) }
+        if let c = space.capacity { items.append(("Capacity", "\(c) worshippers")) }
+        if let y = space.yearEst { items.append(("Established", y)) }
+        if let h = space.heritage { items.append(("Heritage", h)) }
+        if let p = space.postal { items.append(("Postal", p)) }
+        if items.isEmpty { items.append(("Access", "Public")) }
+        return items
     }
 
     private var actions: some View {
         HStack(spacing: Space.s3) {
             PrimaryButton(title: "Directions") { openDirections() }
-            let saved = state.savedSpaces.contains(space.id)
-            GhostButton(title: saved ? "Saved" : "Save") { state.toggleSave(space) }
+            let saved = state.isSaved(space.id)
+            GhostButton(title: saved ? "Saved" : "Save") { state.toggleSave(space.id) }
         }
     }
 
-    private var footer: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            (Text("Last confirmed \(space.confirmedDaysAgo) days ago by a Waqt SG user. ")
-                .foregroundStyle(Palette.mutedInk)
-             + Text("Something changed?")
-                .foregroundStyle(Palette.accent700))
-                .font(Font2.body(12.5))
-                .lineSpacing(2)
-        }
+    private func footer(_ notes: String) -> some View {
+        Text(notes)
+            .font(Font2.body(12.5))
+            .foregroundStyle(Palette.mutedInk)
+            .lineSpacing(2)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private func openDirections() {
-        let item = MKMapItem(placemark: MKPlacemark(coordinate:
-            CLLocationCoordinate2D(latitude: 1.3040, longitude: 103.8318)))
+        guard let c = space.coordinate else { return }
+        let item = MKMapItem(placemark: MKPlacemark(coordinate: c))
         item.name = space.name
         item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking])
     }

@@ -2,6 +2,8 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var state: AppState
+    @EnvironmentObject var spaces: SpacesStore
+    @EnvironmentObject var location: LocationProvider
 
     var body: some View {
         ScrollView {
@@ -12,7 +14,7 @@ struct HomeView: View {
         }
         .background(Palette.bg)
         .ignoresSafeArea(edges: .top)
-        .navigationDestination(for: PrayerSpace.self) { SpaceDetailView(space: $0) }
+        .navigationDestination(for: SpaceRecord.self) { SpaceDetailView(space: $0) }
         .navigationDestination(for: HomeRoute.self) { route in
             switch route {
             case .qadha: QadhaView()
@@ -81,6 +83,7 @@ struct HomeView: View {
         .padding(.bottom, Space.s8)
     }
 
+    @ViewBuilder
     private var nearestSpace: some View {
         VStack(alignment: .leading, spacing: Space.s3) {
             HStack {
@@ -92,37 +95,42 @@ struct HomeView: View {
                 .buttonStyle(.plain)
             }
 
-            let s = state.nearestSpace
-            NavigationLink(value: s) {
-                VStack(alignment: .leading, spacing: Space.s3) {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(s.name)
-                                .font(Font2.condensed(22))
-                                .foregroundStyle(Palette.text)
-                            Text("\(s.type.rawValue) · \(s.floorLandmark)")
-                                .font(Font2.body(13))
-                                .foregroundStyle(Palette.mutedInk)
+            if let s = spaces.nearest(to: location.current) {
+                let metres = s.location?.distance(from: location.current)
+                NavigationLink(value: s) {
+                    VStack(alignment: .leading, spacing: Space.s3) {
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(s.name)
+                                    .font(Font2.condensed(22))
+                                    .foregroundStyle(Palette.text)
+                                Text(s.subtitle)
+                                    .font(Font2.body(13))
+                                    .foregroundStyle(Palette.mutedInk)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            if let metres {
+                                VStack(alignment: .trailing, spacing: -2) {
+                                    Text(metres >= 2000 ? String(format: "%.1f", metres/1000) : "\(Walk.minutes(metres))")
+                                        .font(Font2.condensed(40))
+                                        .foregroundStyle(Palette.text)
+                                        .monospacedDigit()
+                                    CapsLabel(metres >= 2000 ? "km" : "min walk", size: 9.5)
+                                }
+                            }
                         }
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: -2) {
-                            Text("\(s.walkMinutes)")
-                                .font(Font2.condensed(40))
-                                .foregroundStyle(Palette.text)
-                                .monospacedDigit()
-                            CapsLabel("min walk", size: 9.5)
+                        HStack(spacing: Space.s2) {
+                            tag(s.isMosque ? "Masjid" : s.type)
+                            if let addr = s.address { tag(addr).lineLimit(1) }
                         }
                     }
-                    HStack(spacing: Space.s2) {
-                        if s.openNow { tag("Open now") }
-                        tag("Confirmed \(s.confirmedDaysAgo) days ago")
-                    }
+                    .padding(Space.s4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .blueprint(fill: Palette.surface)
                 }
-                .padding(Space.s4)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .blueprint(fill: Palette.surface)
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
@@ -131,6 +139,7 @@ struct HomeView: View {
             .font(Font2.medium(10.5))
             .tracking(0.5)
             .foregroundStyle(Palette.accent700)
+            .lineLimit(1)
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
             .overlay(Rectangle().stroke(Palette.divider, lineWidth: 1))

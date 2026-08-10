@@ -61,31 +61,13 @@ struct Sunnah: Identifiable {
 }
 
 // MARK: - Prayer spaces
+// The live directory is modelled in SpacesStore (SpaceRecord), loaded from spaces.json.
+// SpaceType is kept for the "Add a space" form's type picker.
 
 enum SpaceType: String, CaseIterable, Codable {
     case musollah = "Musollah"
     case masjid   = "Masjid"
     case prayerRoom = "Prayer room"
-}
-
-struct PrayerSpace: Identifiable, Hashable {
-    static func == (lhs: PrayerSpace, rhs: PrayerSpace) -> Bool { lhs.id == rhs.id }
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
-
-    let id = UUID()
-    let name: String
-    let type: SpaceType
-    let floorLandmark: String      // "B4, beside Food Opera"
-    let floorBadge: String         // "B4"
-    let landmarkSentence: String   // "Beside Food Opera, past the service lift lobby"
-    let walkMinutes: Int
-    let originFrom: String         // "From Orchard MRT, exit E"
-    let address: String
-    let closing: String            // "open until 10.00pm"
-    let confirmedDaysAgo: Int
-    let openNow: Bool
-    let jumuah: String?            // "Jumu'ah 12.30 pm and 1.45 pm"
-    let steps: [String]            // getting-there steps
 }
 
 // MARK: - Terawih (Ramadan)

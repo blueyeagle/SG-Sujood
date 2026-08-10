@@ -4,6 +4,8 @@ import SwiftUI
 struct WaqtSGApp: App {
     @StateObject private var state = AppState()
     @StateObject private var nisab = NisabStore()
+    @StateObject private var spacesStore = SpacesStore()
+    @StateObject private var location = LocationProvider()
 
     init() { FontRegistrar.register() }
 
@@ -20,9 +22,15 @@ struct WaqtSGApp: App {
             }
             .environmentObject(state)
             .environmentObject(nisab)
+            .environmentObject(spacesStore)
+            .environmentObject(location)
             .tint(Palette.accent)
             .preferredColorScheme(.light)   // The design is authored on a light technical ground.
-            .task { await nisab.refresh() }  // pull latest nisab from remote config
+            .task {
+                location.start()
+                await nisab.refresh()        // pull latest nisab from remote config
+                await spacesStore.refresh()  // pull latest prayer-space directory
+            }
         }
     }
 }
@@ -46,9 +54,18 @@ struct DebugScreen: View {
             case "reminders": RemindersView()
             case "addspace":  AddSpaceView()
             case "widgets":   WidgetsSpecView()
-            case "space":     SpaceDetailView(space: SampleData.spaces[0])
+            case "space":     DebugSpaceDetail()
             default:          RootShell()
             }
         }
+    }
+}
+
+// Debug helper: opens the first space in the bundled directory for screenshot verification.
+struct DebugSpaceDetail: View {
+    @EnvironmentObject var spaces: SpacesStore
+    var body: some View {
+        if let s = spaces.spaces.first { SpaceDetailView(space: s) }
+        else { Text("no spaces") }
     }
 }

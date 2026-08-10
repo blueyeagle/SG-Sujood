@@ -23,7 +23,7 @@ final class AppState: ObservableObject {
 
     // Nearby
     @Published var spaceFilter: SpaceFilter = .all
-    @Published var savedSpaces: Set<UUID> = []
+    @Published var savedSpaces: Set<String> = []   // SpaceRecord.id
 
     // Reminders
     @Published var reminderOn: [Prayer: Bool] = [
@@ -194,23 +194,12 @@ final class AppState: ObservableObject {
     }
 
     // MARK: - Nearby
+    // The directory itself lives in SpacesStore (remote-configurable); distance sorting
+    // is done in the views using LocationProvider. AppState only holds the filter + saves.
 
-    var filteredSpaces: [PrayerSpace] {
-        let list = SampleData.spaces.sorted { $0.walkMinutes < $1.walkMinutes }
-        switch spaceFilter {
-        case .all:      return list
-        case .musollah: return list.filter { $0.type == .musollah || $0.type == .prayerRoom }
-        case .masjid:   return list.filter { $0.type == .masjid }
-        }
-    }
-
-    var nearestSpace: PrayerSpace {
-        SampleData.spaces.min { $0.walkMinutes < $1.walkMinutes } ?? SampleData.spaces[0]
-    }
-
-    func toggleSave(_ space: PrayerSpace) {
-        if savedSpaces.contains(space.id) { savedSpaces.remove(space.id) }
-        else { savedSpaces.insert(space.id) }
+    func isSaved(_ id: String) -> Bool { savedSpaces.contains(id) }
+    func toggleSave(_ id: String) {
+        if savedSpaces.contains(id) { savedSpaces.remove(id) } else { savedSpaces.insert(id) }
     }
 
     // MARK: - Dzikir

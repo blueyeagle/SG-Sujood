@@ -84,62 +84,7 @@ enum SampleData {
         }
     }
 
-    // MARK: - Prayer spaces
-
-    static let spaces: [PrayerSpace] = [
-        PrayerSpace(name: "ION Orchard", type: .musollah,
-                    floorLandmark: "B4, beside Food Opera", floorBadge: "B4",
-                    landmarkSentence: "Beside Food Opera, past the service lift lobby",
-                    walkMinutes: 3, originFrom: "From Orchard MRT, exit E",
-                    address: "2 Orchard Turn", closing: "open until 10.00pm",
-                    confirmedDaysAgo: 2, openNow: true, jumuah: nil,
-                    steps: [
-                        "Take the escalator down to B4 from the Basement 2 atrium.",
-                        "Walk past Food Opera towards the service corridor on your left.",
-                        "The musollah is the second door, signed in Malay and English."
-                    ]),
-        PrayerSpace(name: "Wisma Atria", type: .musollah,
-                    floorLandmark: "L5, service corridor", floorBadge: "L5",
-                    landmarkSentence: "Level 5, along the service corridor past the offices",
-                    walkMinutes: 4, originFrom: "From Orchard MRT, exit B",
-                    address: "435 Orchard Road", closing: "open until 10.00pm",
-                    confirmedDaysAgo: 6, openNow: true, jumuah: nil, steps: [
-                        "Take the lift to Level 5.",
-                        "Turn right towards the service corridor.",
-                        "The prayer room is at the end on the left."
-                    ]),
-        PrayerSpace(name: "Ngee Ann City", type: .musollah,
-                    floorLandmark: "B2, carpark lift lobby C", floorBadge: "B2",
-                    landmarkSentence: "Basement 2, by carpark lift lobby C",
-                    walkMinutes: 5, originFrom: "From Orchard MRT, exit D",
-                    address: "391 Orchard Road", closing: "open until 9.30pm",
-                    confirmedDaysAgo: 21, openNow: true, jumuah: nil, steps: [
-                        "Head to Basement 2 via the Takashimaya lifts.",
-                        "Follow signs to carpark lift lobby C.",
-                        "The musollah is beside the lobby."
-                    ]),
-        PrayerSpace(name: "Masjid Al-Falah", type: .masjid,
-                    floorLandmark: "22 Bideford Road", floorBadge: "G",
-                    landmarkSentence: "Inside the Cuppage building, ground and upper floors",
-                    walkMinutes: 6, originFrom: "From Somerset MRT, exit B",
-                    address: "22 Bideford Road", closing: "open for all waktu",
-                    confirmedDaysAgo: 4, openNow: true,
-                    jumuah: "Jumu'ah 12.30 pm and 1.45 pm", steps: [
-                        "Walk down Bideford Road from Orchard.",
-                        "Enter through the main entrance on the ground floor.",
-                        "The main prayer hall is one level up."
-                    ]),
-        PrayerSpace(name: "Paragon", type: .musollah,
-                    floorLandmark: "B1, near the taxi stand", floorBadge: "B1",
-                    landmarkSentence: "Basement 1, tucked behind the taxi stand lobby",
-                    walkMinutes: 8, originFrom: "From Orchard MRT, exit E",
-                    address: "290 Orchard Road", closing: "open until 9.30pm",
-                    confirmedDaysAgo: 12, openNow: true, jumuah: nil, steps: [
-                        "Go to Basement 1.",
-                        "Walk towards the taxi stand.",
-                        "The prayer room is behind the lobby, signed."
-                    ]),
-    ]
+    // Prayer spaces are real & remote-configurable — see SpacesStore / spaces.json.
 
     // MARK: - Dzikir presets
 

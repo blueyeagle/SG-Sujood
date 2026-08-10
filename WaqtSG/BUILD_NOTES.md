@@ -71,9 +71,22 @@ The seed currently holds the last figure known at build time (**May 2026 = $17,0
 in-app value is only as fresh as your hosted config. `lowestBalance` on the Zakat screen is
 still an illustrative holding; wire it to real balances / manual entry.
 
+**Prayer spaces are real & remote-configurable.** `spaces.json` holds 165 spaces (75 mosques
+from the MUIS directory + 90 community musollah across Central/East/West/North), parsed from
+the "SG Prayer Spaces" workbook and **geocoded via OneMap** (Singapore's official map API).
+`SpacesStore.swift` mirrors `NisabStore`: bundled seed → cached → async refresh from
+`SpacesStore.remoteURL` (the repo's `spaces.json`). Nearby sorts by real walking distance
+(`LocationProvider` → straight-line metres ÷ 80 m/min); the map plots geocoded pins. Update
+the directory by editing `spaces.json` and re-pushing — no App Store release.
+
+To refresh the directory from a new workbook, re-run the parser/geocoder
+(`scratchpad/build_spaces.py` pattern) and replace `spaces.json`. Note walking times are
+straight-line estimates, not routed; wire MapKit `MKDirections` for door-to-door minutes.
+
 The rest is still placeholder per the handoff's "Content caveats". Before shipping:
 
 - Consider a MUIS Hijri source (currently computed Umm al-Qura, ±1 day).
+- "Add a space" form still doesn't submit anywhere — needs a backend + moderation queue.
 - Build the moderated **prayer-space database** (mosques seeded from MUIS; mall/office
   musollah community-submitted with a "last confirmed" timestamp). Consider OneMap tiles.
 - Have the **sunnah table and niat wording reviewed by a religious authority**; consider

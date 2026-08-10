@@ -10,6 +10,8 @@ Ramadan mode. Built from the design handoff in [`design_handoff_waqt_sg/`](desig
 | --- | --- |
 | [`WaqtSG/`](WaqtSG/) | The Xcode project. Open `WaqtSG/WaqtSG.xcodeproj` and ⌘R. See [`WaqtSG/BUILD_NOTES.md`](WaqtSG/BUILD_NOTES.md). |
 | [`nisab.json`](nisab.json) | **Live nisab config** the app fetches (see below). |
+| [`spaces.json`](spaces.json) | **Live prayer-space directory** (165 spaces, geocoded) the app fetches. |
+| [`SG Prayer Spaces.xlsx`](SG%20Prayer%20Spaces.xlsx) | Source workbook for the directory. |
 | [`Prayer timetable 2026.pdf`](Prayer%20timetable%202026.pdf) | Official MUIS source for the bundled prayer times. |
 | [`design_handoff_waqt_sg/`](design_handoff_waqt_sg/) | Original design reference (HTML prototype, tokens, screenshots). |
 
@@ -33,7 +35,14 @@ https://raw.githubusercontent.com/blueyeagle/SG-Sujood/main/nisab.json
 prepend the same entry to `history` — then commit. Keep this repo public so the raw URL
 serves without a token.
 
+## Prayer spaces (remote config)
+
+[`spaces.json`](spaces.json) lists 165 prayer spaces (mosques + musollah) with coordinates
+from OneMap. The app fetches it from
+`https://raw.githubusercontent.com/blueyeagle/SG-Sujood/main/spaces.json` and falls back to a
+bundled copy. Edit and commit to add/correct a listing without an app release.
+
 ---
 
-*Prayer times, the nisab and the sunnah/niat content should be verified against MUIS / a
-religious authority before public release. See `WaqtSG/BUILD_NOTES.md`.*
+*Prayer times, the nisab, the space directory and the sunnah/niat content should be verified
+against MUIS / a religious authority before public release. See `WaqtSG/BUILD_NOTES.md`.*
