@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Xcode build output / derived data
+build/
+DerivedData/
+*.xcuserstate
+**/xcuserdata/
+
+# Redundant duplicate of design_handoff_waqt_sg/ (kept locally, not versioned)
+Islamic Prayer Locator Singapore.zip

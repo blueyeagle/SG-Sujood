@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="stylesheet" href="_ds/industry-e3f39ffc-1263-4554-bcdd-869c5b67c460/styles.css"><style>body{margin:0;background:#f2f2f3}a{color:#5980a6}a:hover{color:#416180}</style></helmet>
+
+<div style="display:flex;gap:56px;align-items:flex-start;padding:48px 56px;font-family:Barlow,system-ui,sans-serif;color:#1d1f20">
+
+  <div style="width:360px;flex:none;position:sticky;top:48px">
+    <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#5980a6;margin-bottom:10px">Waqt SG · iOS prototype</div>
+    <h1 style="font:600 42px/1.05 'Barlow Condensed',sans-serif;letter-spacing:-.015em;margin:0 0 14px">Prayer times and prayer spaces, for moving around Singapore</h1>
+    <p style="font-size:14px;line-height:1.6;color:rgba(29,31,32,.7);margin:0 0 20px">Timings follow the MUIS daily schedule. The home screen pairs the countdown with the nearest usable space, because the recurring question on a workday is not "when" but "where, and can I make it".</p>
+
+    <div class="blueprint" style="padding:16px;margin-bottom:16px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(29,31,32,.5);margin-bottom:10px">Assumptions</div>
+      <ul style="margin:0;padding-left:16px;font-size:13px;line-height:1.65;color:rgba(29,31,32,.75)">
+        <li>Timings sourced from MUIS; no calculation-method picker.</li>
+        <li>Reminders are silent by default — vibration plus a 15-minute nudge. No adhan audio.</li>
+        <li>A space is described by two facts only: where it is in the building, and how long it takes to walk there.</li>
+        <li>Mall musollah data is community-maintained, so every listing shows when it was last confirmed.</li>
+      </ul>
+    </div>
+
+    <div class="blueprint" style="padding:16px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(29,31,32,.5);margin-bottom:10px">Screens</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <button class="btn btn-secondary" onClick="{{ goOnboard }}" style="justify-content:flex-start">Onboarding</button>
+        <button class="btn btn-secondary" onClick="{{ goHome }}" style="justify-content:flex-start">Home</button>
+        <button class="btn btn-secondary" onClick="{{ goTimes }}" style="justify-content:flex-start">Timetable</button>
+        <button class="btn btn-secondary" onClick="{{ goNearby }}" style="justify-content:flex-start">Map</button>
+        <button class="btn btn-secondary" onClick="{{ goSpace }}" style="justify-content:flex-start">Space detail</button>
+        <button class="btn btn-secondary" onClick="{{ goQibla }}" style="justify-content:flex-start">Qibla</button>
+        <button class="btn btn-secondary" onClick="{{ goQadha }}" style="justify-content:flex-start">Qadha (month)</button>
+        <button class="btn btn-secondary" onClick="{{ goZakat }}" style="justify-content:flex-start">Zakat</button>
+        <button class="btn btn-secondary" onClick="{{ goDzikir }}" style="justify-content:flex-start">Dzikir counter</button>
+        <button class="btn btn-secondary" onClick="{{ goRemind }}" style="justify-content:flex-start">Reminders</button>
+        <button class="btn btn-secondary" onClick="{{ goSubmit }}" style="justify-content:flex-start">Add a space</button>
+        <button class="btn btn-secondary" onClick="{{ goRamadan }}" style="justify-content:flex-start">Ramadan</button>
+        <button class="btn btn-secondary" onClick="{{ goWidgets }}" style="justify-content:flex-start">Widgets</button>
+      </div>
+      <p style="font-size:12px;color:rgba(29,31,32,.5);margin:12px 0 0">The frame is live — the tab bar, cards and toggles all work.</p>
+    </div>
+  </div>
+
+  <div style="flex:none;width:402px">
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;position:relative;display:flex;flex-direction:column;background:#f2f2f3;font-family:Barlow,system-ui,sans-serif;color:#1d1f20">
+
+      <sc-if value="{{ isOnboard }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:88px 26px 40px;background:#1d2d3d;color:#f2f2f3">
+          <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#94bce3">Waqt SG</div>
+          <h2 style="font:600 40px/1.05 'Barlow Condensed',sans-serif;margin:14px 0 12px;letter-spacing:-.015em">Know the time.<br>Know the room.</h2>
+          <p style="font-size:15px;line-height:1.6;color:rgba(242,242,243,.72);margin:0 0 28px">Prayer times from MUIS, and the nearest musollah in whichever mall, office tower or MRT interchange you happen to be standing in.</p>
+          <div style="border:1px solid rgba(148,188,227,.35);padding:18px;margin-bottom:14px">
+            <div style="font:600 17px/1.2 'Barlow Condensed',sans-serif;margin-bottom:6px">Use your location</div>
+            <p style="font-size:13px;line-height:1.55;color:rgba(242,242,243,.65);margin:0">So timings match your area and nearby spaces sort by walking distance. Location is used on device only.</p>
+          </div>
+          <div style="border:1px solid rgba(148,188,227,.35);padding:18px">
+            <div style="font:600 17px/1.2 'Barlow Condensed',sans-serif;margin-bottom:6px">Silent reminders</div>
+            <p style="font-size:13px;line-height:1.55;color:rgba(242,242,243,.65);margin:0">A vibration at each waktu, and a nudge 15 minutes before. Nothing will sound out loud in a meeting.</p>
+          </div>
+          <div style="flex:1"></div>
+          <button onClick="{{ goHome }}" style="width:100%;padding:15px;background:#5980a6;color:#f2f2f3;border:1px solid #749dc4;border-radius:0;font:600 16px/1 'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Allow and continue</button>
+          <button onClick="{{ goHome }}" style="width:100%;padding:12px;margin-top:8px;background:transparent;color:rgba(242,242,243,.6);border:0;font-size:13px;font-family:Barlow,sans-serif;cursor:pointer">Set my location manually</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;overflow:auto">
+          <div style="background:#1d2d3d;color:#f2f2f3;padding:64px 22px 22px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:26px">
+              <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#94bce3">Orchard, Singapore</div>
+              <div style="font-size:11px;color:rgba(242,242,243,.55)">26 Safar 1448</div>
+            </div>
+            <div style="font:600 13px/1 'Barlow Condensed',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,242,243,.6);margin-bottom:6px">Next · {{ nextName }}</div>
+            <div style="display:flex;align-items:flex-end;gap:14px">
+              <div style="font:600 76px/.86 'Barlow Condensed',sans-serif;letter-spacing:-.02em">{{ nextTime }}</div>
+              <div style="font-size:13px;color:rgba(242,242,243,.62);padding-bottom:8px">in {{ countdown }}</div>
+            </div>
+            <div style="height:2px;background:rgba(148,188,227,.25);margin:20px 0 8px;position:relative">
+              <div style="position:absolute;left:0;top:0;bottom:0;background:#94bce3;width:{{ progress }}"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(242,242,243,.5)">
+              <span>{{ prevName }} {{ prevTime }}</span><span>Now {{ nowLabel }}</span>
+            </div>
+          </div>
+
+          <div style="padding:20px 22px 96px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+              <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55)">Nearest space</div>
+              <button onClick="{{ goNearby }}" style="background:none;border:0;font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#5980a6;cursor:pointer">See all</button>
+            </div>
+
+            <div class="blueprint" onClick="{{ goSpace }}" style="padding:18px;margin-bottom:22px;cursor:pointer;background:#e9e9ea"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                <div>
+                  <div style="font:600 22px/1.1 'Barlow Condensed',sans-serif">ION Orchard</div>
+                  <div style="font-size:13px;color:rgba(29,31,32,.62);margin-top:3px">Musollah · B4, beside Food Opera</div>
+                </div>
+                <div style="text-align:right;flex:none">
+                  <div style="font:600 30px/1 'Barlow Condensed',sans-serif;color:#416180">3</div>
+                  <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:rgba(29,31,32,.5)">min walk</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:14px">
+                <span class="tag tag-accent">Open now</span>
+                <span class="tag tag-neutral">Confirmed 2 days ago</span>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+              <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55)">Today &middot; {{ doneCount }} done, {{ missedCount }} missed, {{ pendingCount }} to come</div>
+            </div>
+            <sc-for list="{{ prayers }}" as="p" hint-placeholder-count="5">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(29,31,32,.1)">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:5px;height:5px;background:{{ p.dot }}"></div>
+                  <span style="font:600 17px/1 'Barlow Condensed',sans-serif;letter-spacing:.02em;color:{{ p.ink }}">{{ p.name }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="font-size:14px;font-variant-numeric:tabular-nums;color:{{ p.ink }}">{{ p.time }}</span>
+                  <button onClick="{{ p.mark }}" style="min-width:66px;padding:5px 8px;border:1px solid {{ p.sBorder }};background:{{ p.sBg }};color:{{ p.sInk }};font:600 11px/1.2 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer">{{ p.label }}</button>
+                </div>
+              </div>
+            </sc-for>
+            <div onClick="{{ goQadha }}" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;border:1px solid rgba(29,31,32,.16);cursor:pointer">
+              <div>
+                <div style="font:600 17px/1.1 'Barlow Condensed',sans-serif">Qadha owing</div>
+                <div style="font-size:12px;color:rgba(29,31,32,.55);margin-top:2px">Across August 2026</div>
+              </div>
+              <div style="font:600 26px/1 'Barlow Condensed',sans-serif;color:#416180">{{ qadhaTotal }}</div>
+            </div>
+            <p style="font-size:11.5px;color:rgba(29,31,32,.5);margin-top:10px">Tap a prayer to cycle it: mark &rarr; done &rarr; missed. Anything left missed is added to your qadha count.</p>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTimes }}">
+        <div style="flex:1;overflow:auto;padding:66px 22px 96px">
+          <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:0 0 4px">Timetable</h2>
+          <div style="font-size:12px;color:rgba(29,31,32,.55);margin-bottom:20px">Monday 10 August 2026 · 26 Safar 1448</div>
+
+          <div class="blueprint" style="padding:16px;margin-bottom:22px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#5980a6;margin-bottom:8px">Source</div>
+            <div style="font-size:13px;line-height:1.55;color:rgba(29,31,32,.75)">Majlis Ugama Islam Singapura — the published daily waktu solat for Singapore. Times are identical island-wide.</div>
+          </div>
+
+          <sc-for list="{{ fullDay }}" as="p" hint-placeholder-count="6">
+            <div style="border-bottom:1px solid rgba(29,31,32,.1)">
+              <div onClick="{{ p.toggle }}" style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;cursor:pointer">
+                <div>
+                  <div style="font:600 20px/1.1 'Barlow Condensed',sans-serif;color:{{ p.ink }}">{{ p.name }}</div>
+                  <div style="font-size:11px;color:rgba(29,31,32,.5)">{{ p.note }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="font-size:17px;font-variant-numeric:tabular-nums;color:{{ p.ink }}">{{ p.time }}</div>
+                  <div style="width:20px;height:20px;border:1px solid rgba(29,31,32,.16);display:grid;place-items:center;font:600 13px/1 'Barlow Condensed',sans-serif;color:#5980a6">{{ p.caret }}</div>
+                </div>
+              </div>
+              <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:rgba(29,31,32,.45);padding-bottom:12px">Sunnah · {{ p.sunnahCount }}</div>
+              <sc-if value="{{ p.open }}">
+                <div style="padding:0 0 16px">
+                  <sc-for list="{{ p.sunnah }}" as="s" hint-placeholder-count="2">
+                    <div style="border-left:2px solid #5980a6;padding:0 0 0 14px;margin-bottom:14px">
+                      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                        <div style="font:600 15px/1.1 'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase">{{ s.when }} · {{ s.rak }}</div>
+                        <span class="tag tag-neutral">{{ s.rank }}</span>
+                      </div>
+                      <div style="font-size:14px;line-height:1.55;font-style:italic;color:#416180;margin-top:7px">&ldquo;{{ s.niat }}&rdquo;</div>
+                      <div style="font-size:12px;line-height:1.5;color:rgba(29,31,32,.55);margin-top:5px">{{ s.en }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+
+          <div style="display:flex;gap:8px;margin-top:22px">
+            <button class="btn btn-secondary" style="flex:1">Yesterday</button>
+            <button class="btn btn-secondary" style="flex:1">Tomorrow</button>
+          </div>
+          <p style="font-size:12px;color:rgba(29,31,32,.5);margin-top:18px">Jumu'ah at Masjid Al-Falah: first khutbah 12.30pm, second 1.45pm.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isNearby }}">
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="padding:62px 22px 12px">
+            <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:0 0 10px">Nearby</h2>
+            <div style="display:flex;gap:6px">
+              <button onClick="{{ setAll }}" style="padding:6px 12px;border:1px solid {{ fAllBorder }};background:{{ fAllBg }};color:{{ fAllInk }};font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">All</button>
+              <button onClick="{{ setMall }}" style="padding:6px 12px;border:1px solid {{ fMallBorder }};background:{{ fMallBg }};color:{{ fMallInk }};font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Musollah</button>
+              <button onClick="{{ setMasjid }}" style="padding:6px 12px;border:1px solid {{ fMasjidBorder }};background:{{ fMasjidBg }};color:{{ fMasjidInk }};font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Masjid</button>
+            </div>
+          </div>
+
+          <div style="height:210px;margin:12px 22px 0;position:relative;background:#e9e9ea;border:1px solid rgba(29,31,32,.16);background-image:linear-gradient(rgba(89,128,166,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(89,128,166,.14) 1px,transparent 1px);background-size:26px 26px">
+            <div style="position:absolute;left:0;right:0;top:96px;height:9px;background:rgba(89,128,166,.22)"></div>
+            <div style="position:absolute;top:0;bottom:0;left:118px;width:7px;background:rgba(89,128,166,.16)"></div>
+            <div style="position:absolute;left:106px;top:88px;width:24px;height:24px;border:1.5px solid #1d2d3d;border-radius:50%;background:rgba(89,128,166,.35)"></div>
+            <div style="position:absolute;left:88px;top:116px;font:600 9px/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:rgba(29,31,32,.6)">You</div>
+            <div style="position:absolute;left:168px;top:52px;display:flex;align-items:center;gap:5px"><div style="width:11px;height:11px;background:#5980a6"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif">ION · 3m</span></div>
+            <div style="position:absolute;left:52px;top:150px;display:flex;align-items:center;gap:5px"><div style="width:11px;height:11px;background:#5980a6"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif">Wisma · 4m</span></div>
+            <div style="position:absolute;left:218px;top:132px;display:flex;align-items:center;gap:5px"><div style="width:11px;height:11px;border:1.5px solid #1d2d3d"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif">Al-Falah · 6m</span></div>
+            <div style="position:absolute;left:196px;top:18px;display:flex;align-items:center;gap:5px"><div style="width:11px;height:11px;background:#5980a6"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif">Ngee Ann · 5m</span></div>
+          </div>
+
+          <div style="flex:1;overflow:auto;padding:16px 22px 96px">
+            <sc-for list="{{ spaces }}" as="s" hint-placeholder-count="4">
+              <div onClick="{{ goSpace }}" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer">
+                <div>
+                  <div style="font:600 19px/1.15 'Barlow Condensed',sans-serif">{{ s.name }}</div>
+                  <div style="font-size:12.5px;color:rgba(29,31,32,.62);margin-top:2px">{{ s.where }}</div>
+                  <div style="font-size:11px;color:rgba(29,31,32,.45);margin-top:4px">{{ s.meta }}</div>
+                </div>
+                <div style="text-align:right;flex:none">
+                  <div style="font:600 24px/1 'Barlow Condensed',sans-serif;color:#416180">{{ s.min }}</div>
+                  <div style="font:600 9px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:rgba(29,31,32,.5);margin-top:2px">min</div>
+                </div>
+              </div>
+            </sc-for>
+            <button onClick="{{ goSubmit }}" class="btn btn-secondary btn-block" style="margin-top:18px">Add a space you know</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSpace }}">
+        <div style="flex:1;overflow:auto">
+          <div style="position:relative;height:190px;background:#e9e9ea;border-bottom:1px solid rgba(29,31,32,.16);background-image:repeating-linear-gradient(135deg,rgba(89,128,166,.18) 0 2px,transparent 2px 9px)">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 11px/1.5 ui-monospace,Menlo,monospace;color:rgba(29,31,32,.5);text-align:center">photo of the musollah entrance<br>(community submitted)</div>
+            <button onClick="{{ goNearby }}" style="position:absolute;top:58px;left:16px;width:36px;height:36px;border:1px solid rgba(29,31,32,.16);background:#f2f2f3;font:600 15px/1 'Barlow Condensed',sans-serif;cursor:pointer">&#8592;</button>
+          </div>
+
+          <div style="padding:20px 22px 96px">
+            <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#5980a6;margin-bottom:6px">Musollah</div>
+            <h2 style="font:600 32px/1.05 'Barlow Condensed',sans-serif;margin:0 0 4px">ION Orchard</h2>
+            <div style="font-size:13px;color:rgba(29,31,32,.6);margin-bottom:18px">2 Orchard Turn · open until 10.00pm</div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(29,31,32,.16);border:1px solid rgba(29,31,32,.16);margin-bottom:20px">
+              <div style="background:#f2f2f3;padding:16px">
+                <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(29,31,32,.5);margin-bottom:8px">Where</div>
+                <div style="font:600 26px/1 'Barlow Condensed',sans-serif">B4</div>
+                <div style="font-size:12.5px;color:rgba(29,31,32,.65);margin-top:4px">Beside Food Opera, past the service lift lobby</div>
+              </div>
+              <div style="background:#f2f2f3;padding:16px">
+                <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(29,31,32,.5);margin-bottom:8px">Walk</div>
+                <div style="font:600 26px/1 'Barlow Condensed',sans-serif">3 min</div>
+                <div style="font-size:12.5px;color:rgba(29,31,32,.65);margin-top:4px">From Orchard MRT, exit E</div>
+              </div>
+            </div>
+
+            <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:10px">Getting there</div>
+            <div style="border-left:1px solid rgba(29,31,32,.16);padding-left:16px;margin-bottom:22px">
+              <div style="position:relative;padding-bottom:14px"><div style="position:absolute;left:-20px;top:4px;width:7px;height:7px;background:#5980a6"></div><div style="font-size:13.5px;line-height:1.5">Take the escalator down to B4 from the Basement 2 atrium.</div></div>
+              <div style="position:relative;padding-bottom:14px"><div style="position:absolute;left:-20px;top:4px;width:7px;height:7px;background:#5980a6"></div><div style="font-size:13.5px;line-height:1.5">Walk past Food Opera towards the service corridor on your left.</div></div>
+              <div style="position:relative"><div style="position:absolute;left:-20px;top:4px;width:7px;height:7px;background:#5980a6"></div><div style="font-size:13.5px;line-height:1.5">The musollah is the second door, signed in Malay and English.</div></div>
+            </div>
+
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary" style="flex:1">Directions</button>
+              <button class="btn btn-secondary" style="flex:1">Save</button>
+            </div>
+            <p style="font-size:11.5px;color:rgba(29,31,32,.5);margin-top:16px">Last confirmed 2 days ago by a Waqt SG user. <a href="#" style="color:#416180">Something changed?</a></p>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isQibla }}">
+        <div style="flex:1;overflow:auto;padding:66px 22px 96px;display:flex;flex-direction:column;align-items:center">
+          <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:0 0 4px;align-self:flex-start">Qibla</h2>
+          <div style="font-size:12px;color:rgba(29,31,32,.55);margin-bottom:28px;align-self:flex-start">Hold the phone flat and turn slowly</div>
+
+          <div style="position:relative;width:280px;height:280px;border:1px solid rgba(29,31,32,.16);border-radius:50%;display:grid;place-items:center;background-image:radial-gradient(circle,transparent 60%,rgba(89,128,166,.06) 61%)">
+            <div style="position:absolute;inset:34px;border:1px solid rgba(29,31,32,.1);border-radius:50%"></div>
+            <div style="position:absolute;top:8px;font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;color:rgba(29,31,32,.5)">N</div>
+            <div style="position:absolute;bottom:8px;font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;color:rgba(29,31,32,.5)">S</div>
+            <div style="position:absolute;left:10px;font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;color:rgba(29,31,32,.5)">W</div>
+            <div style="position:absolute;right:10px;font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;color:rgba(29,31,32,.5)">E</div>
+            <div style="position:absolute;width:1px;height:126px;background:#5980a6;top:26px;transform-origin:bottom center;transform:rotate(293deg)"></div>
+            <div style="position:absolute;width:13px;height:13px;background:#5980a6;transform:rotate(45deg);top:110px;left:44px"></div>
+            <div style="text-align:center">
+              <div style="font:600 48px/1 'Barlow Condensed',sans-serif">293&deg;</div>
+              <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.5);margin-top:6px">Northwest</div>
+            </div>
+          </div>
+
+          <div class="blueprint" style="padding:16px;margin-top:34px;width:100%"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font-size:13px;line-height:1.6;color:rgba(29,31,32,.75)">From Singapore the Kaaba lies 293&deg; from true north — roughly the direction of the Botanic Gardens if you are standing on Orchard Road.</div>
+          </div>
+          <button class="btn btn-secondary btn-block" style="margin-top:12px">Recalibrate compass</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMore }}">
+        <div style="flex:1;overflow:auto;padding:66px 22px 96px">
+          <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:0 0 20px">More</h2>
+          <div style="border-top:1px solid rgba(29,31,32,.16)">
+            <div onClick="{{ goQadha }}" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer"><div><div style="font:600 19px/1.1 'Barlow Condensed',sans-serif">Qadha record</div><div style="font-size:12px;color:rgba(29,31,32,.55)">{{ qadhaTotal }} prayers owing this month</div></div><span style="color:rgba(29,31,32,.4)">&#8594;</span></div>
+            <div onClick="{{ goDzikir }}" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer"><div><div style="font:600 19px/1.1 'Barlow Condensed',sans-serif">Dzikir counter</div><div style="font-size:12px;color:rgba(29,31,32,.55)">Tasbih after every fardhu</div></div><span style="color:rgba(29,31,32,.4)">&#8594;</span></div>
+            <div onClick="{{ goZakat }}" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer"><div><div style="font:600 19px/1.1 'Barlow Condensed',sans-serif">Zakat</div><div style="font-size:12px;color:rgba(29,31,32,.55)">Kadar nisab and end of haul</div></div><span style="color:rgba(29,31,32,.4)">&#8594;</span></div>
+            <div onClick="{{ goRemind }}" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer"><div><div style="font:600 19px/1.1 'Barlow Condensed',sans-serif">Reminders</div><div style="font-size:12px;color:rgba(29,31,32,.55)">Silent · 15 min before</div></div><span style="color:rgba(29,31,32,.4)">&#8594;</span></div>
+            <div onClick="{{ goSubmit }}" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer"><div><div style="font:600 19px/1.1 'Barlow Condensed',sans-serif">Add a prayer space</div><div style="font-size:12px;color:rgba(29,31,32,.55)">Help others find it</div></div><span style="color:rgba(29,31,32,.4)">&#8594;</span></div>
+            <div onClick="{{ goRamadan }}" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer"><div><div style="font:600 19px/1.1 'Barlow Condensed',sans-serif">Ramadan mode</div><div style="font-size:12px;color:rgba(29,31,32,.55)">Sahur and iftar countdowns</div></div><span style="color:rgba(29,31,32,.4)">&#8594;</span></div>
+            <div onClick="{{ goWidgets }}" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer"><div><div style="font:600 19px/1.1 'Barlow Condensed',sans-serif">Widgets &amp; Lock Screen</div><div style="font-size:12px;color:rgba(29,31,32,.55)">Countdown without opening the app</div></div><span style="color:rgba(29,31,32,.4)">&#8594;</span></div>
+            <div onClick="{{ goOnboard }}" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(29,31,32,.1);cursor:pointer"><div><div style="font:600 19px/1.1 'Barlow Condensed',sans-serif">Location</div><div style="font-size:12px;color:rgba(29,31,32,.55)">Orchard, Singapore</div></div><span style="color:rgba(29,31,32,.4)">&#8594;</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRemind }}">
+        <div style="flex:1;overflow:auto;padding:58px 22px 96px">
+          <button onClick="{{ goMore }}" style="width:36px;height:36px;border:1px solid rgba(29,31,32,.16);background:#f2f2f3;font:600 15px/1 'Barlow Condensed',sans-serif;cursor:pointer;margin-bottom:14px">&#8592;</button>
+          <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:0 0 18px">Reminders</h2>
+
+          <div class="blueprint" style="padding:16px;margin-bottom:22px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font-size:13px;line-height:1.6;color:rgba(29,31,32,.75)">Every alert is silent. You will feel a vibration and see the waktu on the Lock Screen — nothing plays out loud.</div>
+          </div>
+
+          <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:8px">Per waktu</div>
+          <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="6">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid rgba(29,31,32,.1)">
+              <div>
+                <div style="font:600 18px/1.1 'Barlow Condensed',sans-serif">{{ t.name }}</div>
+                <div style="font-size:11.5px;color:rgba(29,31,32,.5)">{{ t.sub }}</div>
+              </div>
+              <div onClick="{{ t.toggle }}" style="width:46px;height:26px;border:1px solid {{ t.border }};background:{{ t.bg }};position:relative;cursor:pointer">
+                <div style="position:absolute;top:3px;left:{{ t.knob }};width:18px;height:18px;background:{{ t.knobBg }}"></div>
+              </div>
+            </div>
+          </sc-for>
+
+          <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin:22px 0 8px">Nudge before</div>
+          <div style="display:flex;gap:6px">
+            <button onClick="{{ setLead10 }}" style="flex:1;padding:10px;border:1px solid {{ l10Border }};background:{{ l10Bg }};color:{{ l10Ink }};font:600 14px/1 'Barlow Condensed',sans-serif;cursor:pointer">10 min</button>
+            <button onClick="{{ setLead15 }}" style="flex:1;padding:10px;border:1px solid {{ l15Border }};background:{{ l15Bg }};color:{{ l15Ink }};font:600 14px/1 'Barlow Condensed',sans-serif;cursor:pointer">15 min</button>
+            <button onClick="{{ setLead30 }}" style="flex:1;padding:10px;border:1px solid {{ l30Border }};background:{{ l30Bg }};color:{{ l30Ink }};font:600 14px/1 'Barlow Condensed',sans-serif;cursor:pointer">30 min</button>
+          </div>
+          <p style="font-size:12px;color:rgba(29,31,32,.5);margin-top:14px">The nudge names the nearest space, so you can decide whether to move now or pray where you are.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSubmit }}">
+        <div style="flex:1;overflow:auto;padding:58px 22px 96px">
+          <button onClick="{{ goMore }}" style="width:36px;height:36px;border:1px solid rgba(29,31,32,.16);background:#f2f2f3;font:600 15px/1 'Barlow Condensed',sans-serif;cursor:pointer;margin-bottom:14px">&#8592;</button>
+          <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:0 0 4px">Add a space</h2>
+          <p style="font-size:13px;color:rgba(29,31,32,.6);margin:0 0 20px">Two facts are enough: where it is in the building, and how long it takes to walk there.</p>
+
+          <div class="field" style="margin-bottom:14px"><label>Building or mall</label><input class="input" value="Suntec City" readonly></div>
+          <div class="field" style="margin-bottom:14px"><label>Floor and landmark</label><input class="input" value="B1, Tower 2 — behind the taxi stand lobby" readonly></div>
+          <div class="field" style="margin-bottom:14px"><label>Walking time from the nearest MRT exit</label><input class="input" value="7 minutes" readonly></div>
+
+          <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin:20px 0 8px">Type</div>
+          <div style="display:flex;gap:6px;margin-bottom:20px">
+            <button style="flex:1;padding:10px;border:1px solid #5980a6;background:#5980a6;color:#f2f2f3;font:600 14px/1 'Barlow Condensed',sans-serif;cursor:pointer">Musollah</button>
+            <button style="flex:1;padding:10px;border:1px solid rgba(29,31,32,.16);background:transparent;font:600 14px/1 'Barlow Condensed',sans-serif;cursor:pointer">Masjid</button>
+            <button style="flex:1;padding:10px;border:1px solid rgba(29,31,32,.16);background:transparent;font:600 14px/1 'Barlow Condensed',sans-serif;cursor:pointer">Prayer room</button>
+          </div>
+
+          <div style="border:1px dashed rgba(29,31,32,.3);padding:26px;text-align:center;margin-bottom:20px">
+            <div style="font:400 11px/1.5 ui-monospace,Menlo,monospace;color:rgba(29,31,32,.5)">add a photo of the entrance<br>so the next person recognises it</div>
+          </div>
+
+          <button onClick="{{ goNearby }}" class="btn btn-primary btn-block">Submit for review</button>
+          <p style="font-size:11.5px;color:rgba(29,31,32,.5);margin-top:12px">A moderator checks new spaces within two days. You can confirm existing listings any time — that is what keeps the floor numbers right.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRamadan }}">
+        <div style="flex:1;overflow:auto;background:#1d2d3d;color:#f2f2f3">
+          <div style="padding:58px 22px 30px">
+            <button onClick="{{ goMore }}" style="width:36px;height:36px;border:1px solid rgba(148,188,227,.4);background:transparent;color:#f2f2f3;font:600 15px/1 'Barlow Condensed',sans-serif;cursor:pointer;margin-bottom:16px">&#8592;</button>
+            <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#94bce3">Ramadan · Day 14</div>
+            <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:12px 0 26px">Iftar in 3h 42m</h2>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(148,188,227,.3);border:1px solid rgba(148,188,227,.3);margin-bottom:22px">
+              <div style="background:#1d2d3d;padding:16px"><div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,242,243,.55);margin-bottom:8px">Imsak</div><div style="font:600 26px/1 'Barlow Condensed',sans-serif">5.34 am</div></div>
+              <div style="background:#1d2d3d;padding:16px"><div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,242,243,.55);margin-bottom:8px">Maghrib</div><div style="font:600 26px/1 'Barlow Condensed',sans-serif">7.11 pm</div></div>
+            </div>
+
+            <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(242,242,243,.55);margin-bottom:10px">Terawih nearby</div>
+            <div style="border-top:1px solid rgba(148,188,227,.25)">
+              <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(148,188,227,.2)"><div><div style="font:600 18px/1.1 'Barlow Condensed',sans-serif">Masjid Al-Falah</div><div style="font-size:12px;color:rgba(242,242,243,.55)">20 rakaat · 8.30 pm</div></div><div style="font-size:13px;color:rgba(242,242,243,.6);align-self:center">6 min</div></div>
+              <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(148,188,227,.2)"><div><div style="font:600 18px/1.1 'Barlow Condensed',sans-serif">Masjid Sultan</div><div style="font-size:12px;color:rgba(242,242,243,.55)">8 rakaat · 8.15 pm</div></div><div style="font-size:13px;color:rgba(242,242,243,.6);align-self:center">14 min</div></div>
+            </div>
+            <p style="font-size:12px;color:rgba(242,242,243,.5);margin-top:18px">Ramadan mode switches on by itself on 1 Ramadan and turns off after Syawal.</p>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDzikir }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:#1d2d3d;color:#f2f2f3">
+          <div style="padding:58px 22px 0">
+            <button onClick="{{ goMore }}" style="width:36px;height:36px;border:1px solid rgba(148,188,227,.4);background:transparent;color:#f2f2f3;font:600 15px/1 'Barlow Condensed',sans-serif;cursor:pointer;margin-bottom:16px">&#8592;</button>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ dzList }}" as="d" hint-placeholder-count="4">
+                <button onClick="{{ d.pick }}" style="padding:7px 12px;border:1px solid {{ d.border }};background:{{ d.bg }};color:{{ d.ink }};font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">{{ d.name }} {{ d.target }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div onClick="{{ dzTap }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;user-select:none;padding:20px 22px">
+            <div style="font:600 13px/1 'Barlow Condensed',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#94bce3">{{ dzName }}</div>
+            <div style="font-size:12.5px;color:rgba(242,242,243,.55);margin-top:6px">{{ dzMeaning }}</div>
+            <div style="font:600 132px/1 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums;margin:14px 0 4px">{{ dzCount }}</div>
+            <div style="font-size:13px;color:rgba(242,242,243,.55)">of {{ dzTarget }}</div>
+            <div style="width:100%;max-width:260px;height:2px;background:rgba(148,188,227,.25);margin-top:22px">
+              <div style="height:2px;background:#94bce3;width:{{ dzProgress }}"></div>
+            </div>
+            <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(242,242,243,.45);margin-top:26px">Tap anywhere to count</div>
+          </div>
+
+          <div style="padding:0 22px 46px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid rgba(148,188,227,.25)">
+              <div style="font-size:12.5px;color:rgba(242,242,243,.6)">Full rounds completed today &middot; {{ dzRounds }}</div>
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ dzBack }}" style="padding:8px 14px;border:1px solid rgba(148,188,227,.4);background:transparent;color:#f2f2f3;font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Undo</button>
+                <button onClick="{{ dzReset }}" style="padding:8px 14px;border:1px solid rgba(148,188,227,.4);background:transparent;color:#f2f2f3;font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Reset</button>
+              </div>
+            </div>
+            <p style="font-size:11.5px;color:rgba(242,242,243,.45);margin:0">The counter vibrates once at each target and moves to the next dzikir on its own, so you can keep your eyes closed.</p>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isZakat }}">
+        <div style="flex:1;overflow:auto">
+          <div style="background:#1d2d3d;color:#f2f2f3;padding:58px 22px 24px">
+            <button onClick="{{ goMore }}" style="width:36px;height:36px;border:1px solid rgba(148,188,227,.4);background:transparent;color:#f2f2f3;font:600 15px/1 'Barlow Condensed',sans-serif;cursor:pointer;margin-bottom:16px">&#8592;</button>
+            <div style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#94bce3">Kadar nisab &middot; 10 August 2026</div>
+            <div style="display:flex;align-items:flex-end;gap:10px;margin-top:12px">
+              <div style="font:600 62px/.9 'Barlow Condensed',sans-serif">$8,347</div>
+              <div style="font-size:13px;color:rgba(242,242,243,.6);padding-bottom:8px">.00 SGD</div>
+            </div>
+            <div style="font-size:12.5px;line-height:1.55;color:rgba(242,242,243,.6);margin-top:10px">The value of 86 grams of gold, published daily by MUIS. Wealth held above this figure for a full haul is subject to zakat harta.</div>
+          </div>
+
+          <div style="padding:20px 22px 96px">
+            <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:10px">End of haul</div>
+            <div class="blueprint" style="padding:18px;margin-bottom:22px;background:#e9e9ea"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font:600 34px/1 'Barlow Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ haulCount }}</div>
+              <div style="font-size:12.5px;color:rgba(29,31,32,.6);margin-top:6px">Haul began 12 Rabiulawal 1447 &middot; completes 25 August 2026</div>
+              <div style="height:3px;background:rgba(29,31,32,.12);margin-top:14px">
+                <div style="height:3px;background:#5980a6;width:{{ haulProgress }}"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(29,31,32,.5);margin-top:6px"><span>Day 339</span><span>354 days &middot; one lunar year</span></div>
+            </div>
+
+            <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:10px">Your holding</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(29,31,32,.16);border:1px solid rgba(29,31,32,.16);margin-bottom:14px">
+              <div style="background:#f2f2f3;padding:16px">
+                <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(29,31,32,.5);margin-bottom:8px">Lowest balance</div>
+                <div style="font:600 26px/1 'Barlow Condensed',sans-serif">$12,400</div>
+                <div style="font-size:12px;color:rgba(29,31,32,.6);margin-top:4px">Held above nisab all haul</div>
+              </div>
+              <div style="background:#f2f2f3;padding:16px">
+                <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(29,31,32,.5);margin-bottom:8px">Zakat at 2.5%</div>
+                <div style="font:600 26px/1 'Barlow Condensed',sans-serif;color:#416180">$310</div>
+                <div style="font-size:12px;color:rgba(29,31,32,.6);margin-top:4px">Payable on 25 August</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:22px">
+              <span class="tag tag-accent">Above nisab</span>
+              <span class="tag tag-neutral">Zakat harta</span>
+            </div>
+
+            <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:6px">Nisab this week</div>
+            <div style="border-top:1px solid rgba(29,31,32,.16)">
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(29,31,32,.1);font-size:13.5px"><span style="color:rgba(29,31,32,.6)">Mon 10 Aug</span><span style="font-variant-numeric:tabular-nums">$8,347.00</span></div>
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(29,31,32,.1);font-size:13.5px"><span style="color:rgba(29,31,32,.6)">Sun 9 Aug</span><span style="font-variant-numeric:tabular-nums">$8,312.40</span></div>
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(29,31,32,.1);font-size:13.5px"><span style="color:rgba(29,31,32,.6)">Sat 8 Aug</span><span style="font-variant-numeric:tabular-nums">$8,298.75</span></div>
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(29,31,32,.1);font-size:13.5px"><span style="color:rgba(29,31,32,.6)">Fri 7 Aug</span><span style="font-variant-numeric:tabular-nums">$8,301.10</span></div>
+            </div>
+
+            <button class="btn btn-primary btn-block" style="margin-top:20px">Pay zakat</button>
+            <button class="btn btn-secondary btn-block">Set a reminder for 25 August</button>
+            <p style="font-size:11.5px;color:rgba(29,31,32,.5);margin-top:14px">Figures are an estimate for planning. Payment is handled by MUIS; the nisab shown is their published daily rate.</p>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isQadha }}">
+        <div style="flex:1;overflow:auto;padding:58px 22px 96px">
+          <button onClick="{{ goHome }}" style="width:36px;height:36px;border:1px solid rgba(29,31,32,.16);background:#f2f2f3;font:600 15px/1 'Barlow Condensed',sans-serif;cursor:pointer;margin-bottom:14px">&#8592;</button>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:0">Qadha</h2>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button style="width:28px;height:28px;border:1px solid rgba(29,31,32,.16);background:transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif">&#8592;</button>
+              <span style="font:600 15px/1 'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase">Aug 2026</span>
+              <button style="width:28px;height:28px;border:1px solid rgba(29,31,32,.16);background:transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif">&#8594;</button>
+            </div>
+          </div>
+          <p style="font-size:13px;color:rgba(29,31,32,.6);margin:0 0 20px">Every fardhu you left marked as missed is counted here. Pray it, then record it — the count comes down one at a time.</p>
+
+          <div class="blueprint" style="padding:18px;margin-bottom:22px;background:#e9e9ea"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end">
+              <div>
+                <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.5)">Outstanding this month</div>
+                <div style="font:600 52px/1 'Barlow Condensed',sans-serif;margin-top:6px">{{ qadhaTotal }}</div>
+              </div>
+              <div style="font-size:12px;color:rgba(29,31,32,.55);text-align:right;line-height:1.5">prayers<br>owing</div>
+            </div>
+          </div>
+
+          <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:10px">August</div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px">
+            <sc-for list="{{ monthDays }}" as="d" hint-placeholder-count="31">
+              <div style="aspect-ratio:1;display:grid;place-items:center;border:1px solid rgba(29,31,32,.12);background:{{ d.bg }};color:{{ d.ink }};font:600 12px/1 'Barlow Condensed',sans-serif">{{ d.n }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:14px;font-size:11px;color:rgba(29,31,32,.55);margin-bottom:24px">
+            <span style="display:flex;align-items:center;gap:6px"><i style="width:9px;height:9px;background:rgba(89,128,166,.18);border:1px solid rgba(29,31,32,.12);display:block"></i>Complete</span>
+            <span style="display:flex;align-items:center;gap:6px"><i style="width:9px;height:9px;background:#1d2d3d;display:block"></i>One or more missed</span>
+          </div>
+
+          <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:6px">By waktu</div>
+          <sc-for list="{{ qadhaRows }}" as="q" hint-placeholder-count="5">
+            <div style="padding:14px 0;border-bottom:1px solid rgba(29,31,32,.1)">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                <div style="display:flex;align-items:baseline;gap:10px">
+                  <span style="font:600 20px/1 'Barlow Condensed',sans-serif;color:{{ q.ink }}">{{ q.name }}</span>
+                  <span style="font-size:13px;color:rgba(29,31,32,.55)">{{ q.count }} owing</span>
+                </div>
+                <button onClick="{{ q.pay }}" style="padding:8px 12px;border:1px solid {{ q.btnBorder }};background:{{ q.btnBg }};color:{{ q.btnInk }};font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Qadha done</button>
+              </div>
+              <div style="height:3px;background:rgba(29,31,32,.1);margin-top:10px">
+                <div style="height:3px;background:#5980a6;width:{{ q.bar }}"></div>
+              </div>
+            </div>
+          </sc-for>
+          <p style="font-size:11.5px;color:rgba(29,31,32,.5);margin-top:16px">Recording a qadha only reduces the count — it does not change the day it was missed.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isWidgets }}">
+        <div style="flex:1;overflow:auto;padding:58px 22px 96px">
+          <button onClick="{{ goMore }}" style="width:36px;height:36px;border:1px solid rgba(29,31,32,.16);background:#f2f2f3;font:600 15px/1 'Barlow Condensed',sans-serif;cursor:pointer;margin-bottom:14px">&#8592;</button>
+          <h2 style="font:600 34px/1.05 'Barlow Condensed',sans-serif;margin:0 0 18px">Widgets</h2>
+
+          <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:10px">Lock Screen</div>
+          <div style="background:#1d2d3d;padding:20px;margin-bottom:24px">
+            <div style="color:rgba(242,242,243,.6);font-size:12px">Monday 10 August</div>
+            <div style="font:600 62px/1 'Barlow Condensed',sans-serif;color:#f2f2f3;margin:2px 0 16px">4:02</div>
+            <div style="display:flex;gap:10px">
+              <div style="flex:1;border:1px solid rgba(148,188,227,.4);padding:10px"><div style="font:600 9px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#94bce3">Asar</div><div style="font:600 20px/1 'Barlow Condensed',sans-serif;color:#f2f2f3;margin-top:5px">in 30m</div></div>
+              <div style="flex:1;border:1px solid rgba(148,188,227,.4);padding:10px"><div style="font:600 9px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#94bce3">Nearest</div><div style="font:600 20px/1 'Barlow Condensed',sans-serif;color:#f2f2f3;margin-top:5px">ION · 3m</div></div>
+            </div>
+          </div>
+
+          <div style="font:600 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(29,31,32,.55);margin-bottom:10px">Home Screen</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="blueprint" style="padding:14px;aspect-ratio:1;display:flex;flex-direction:column;justify-content:space-between"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#5980a6">Asar</div>
+              <div><div style="font:600 34px/1 'Barlow Condensed',sans-serif">4.32</div><div style="font-size:11px;color:rgba(29,31,32,.55);margin-top:4px">in 30 minutes</div></div>
+            </div>
+            <div class="blueprint" style="padding:14px;aspect-ratio:1;display:flex;flex-direction:column;justify-content:space-between"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font:600 10px/1 'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#5980a6">Nearest</div>
+              <div><div style="font:600 22px/1.05 'Barlow Condensed',sans-serif">ION Orchard</div><div style="font-size:11px;color:rgba(29,31,32,.55);margin-top:4px">B4 · 3 min walk</div></div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:rgba(29,31,32,.5);margin-top:16px">Both widgets refresh on the hour and whenever you move to a new building.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+        <div style="position:absolute;left:0;right:0;bottom:0;height:76px;background:#f2f2f3;border-top:1px solid rgba(29,31,32,.16);display:grid;grid-template-columns:repeat(5,1fr);align-items:start;padding-top:12px;z-index:40">
+          <button onClick="{{ goHome }}" style="background:none;border:0;cursor:pointer;padding:0"><div style="height:2px;background:{{ tHome }};margin:0 auto 8px;width:22px"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:{{ tHomeInk }}">Home</span></button>
+          <button onClick="{{ goTimes }}" style="background:none;border:0;cursor:pointer;padding:0"><div style="height:2px;background:{{ tTimes }};margin:0 auto 8px;width:22px"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:{{ tTimesInk }}">Times</span></button>
+          <button onClick="{{ goNearby }}" style="background:none;border:0;cursor:pointer;padding:0"><div style="height:2px;background:{{ tNearby }};margin:0 auto 8px;width:22px"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:{{ tNearbyInk }}">Nearby</span></button>
+          <button onClick="{{ goQibla }}" style="background:none;border:0;cursor:pointer;padding:0"><div style="height:2px;background:{{ tQibla }};margin:0 auto 8px;width:22px"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:{{ tQiblaInk }}">Qibla</span></button>
+          <button onClick="{{ goMore }}" style="background:none;border:0;cursor:pointer;padding:0"><div style="height:2px;background:{{ tMore }};margin:0 auto 8px;width:22px"></div><span style="font:600 11px/1 'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:{{ tMoreInk }}">More</span></button>
+        </div>
+      </sc-if>
+
+    </div>
+  </x-import>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:1000}}">
+const PRAYERS = [
+  { name: "Subuh", time: "5.44 am", note: "Syuruk 7.07 am", sec: 5 * 3600 + 44 * 60, sunnah: [
+    { when: "Before", rak: "2 rakaat", rank: "Muakkad", niat: "Usalli sunnatas Subhi rak'ataini qabliyyatan lillahi ta'ala.",
+      en: "I intend to pray the sunnah of Subuh, two rakaat, before, for Allah Ta'ala." }
+  ] },
+  { name: "Syuruk", time: "7.07 am", note: "Sunrise — not a prayer time", sec: 7 * 3600 + 7 * 60, sunnah: [
+    { when: "After", rak: "2 – 8 rakaat", rank: "Dhuha", niat: "Usalli sunnatad Dhuha rak'ataini lillahi ta'ala.",
+      en: "Dhuha may be prayed from about 20 minutes after Syuruk until Zohor." }
+  ] },
+  { name: "Zohor", time: "1.09 pm", note: "Jumu'ah on Friday", sec: 13 * 3600 + 9 * 60, sunnah: [
+    { when: "Before", rak: "2 or 4 rakaat", rank: "Muakkad", niat: "Usalli sunnataz Zuhri rak'ataini qabliyyatan lillahi ta'ala.",
+      en: "I intend to pray the sunnah of Zohor, two rakaat, before, for Allah Ta'ala." },
+    { when: "After", rak: "2 rakaat", rank: "Muakkad", niat: "Usalli sunnataz Zuhri rak'ataini ba'diyyatan lillahi ta'ala.",
+      en: "I intend to pray the sunnah of Zohor, two rakaat, after, for Allah Ta'ala." }
+  ] },
+  { name: "Asar", time: "4.32 pm", note: "", sec: 16 * 3600 + 32 * 60, sunnah: [
+    { when: "Before", rak: "2 or 4 rakaat", rank: "Ghair muakkad", niat: "Usalli sunnatal 'Asri rak'ataini qabliyyatan lillahi ta'ala.",
+      en: "I intend to pray the sunnah of Asar, two rakaat, before, for Allah Ta'ala." }
+  ] },
+  { name: "Maghrib", time: "7.11 pm", note: "Short window — about 74 minutes", sec: 19 * 3600 + 11 * 60, sunnah: [
+    { when: "Before", rak: "2 rakaat", rank: "Ghair muakkad", niat: "Usalli sunnatal Maghribi rak'ataini qabliyyatan lillahi ta'ala.",
+      en: "I intend to pray the sunnah of Maghrib, two rakaat, before, for Allah Ta'ala." },
+    { when: "After", rak: "2 rakaat", rank: "Muakkad", niat: "Usalli sunnatal Maghribi rak'ataini ba'diyyatan lillahi ta'ala.",
+      en: "I intend to pray the sunnah of Maghrib, two rakaat, after, for Allah Ta'ala." }
+  ] },
+  { name: "Isyak", time: "8.25 pm", note: "", sec: 20 * 3600 + 25 * 60, sunnah: [
+    { when: "Before", rak: "2 rakaat", rank: "Ghair muakkad", niat: "Usalli sunnatal 'Isyaa'i rak'ataini qabliyyatan lillahi ta'ala.",
+      en: "I intend to pray the sunnah of Isyak, two rakaat, before, for Allah Ta'ala." },
+    { when: "After", rak: "2 rakaat", rank: "Muakkad", niat: "Usalli sunnatal 'Isyaa'i rak'ataini ba'diyyatan lillahi ta'ala.",
+      en: "I intend to pray the sunnah of Isyak, two rakaat, after, for Allah Ta'ala." }
+  ] }
+];
+
+const SPACES = [
+  { name: "ION Orchard", where: "Musollah · B4, beside Food Opera", meta: "Confirmed 2 days ago", min: 3, kind: "musollah" },
+  { name: "Wisma Atria", where: "Prayer room · L5, service corridor", meta: "Confirmed 6 days ago", min: 4, kind: "musollah" },
+  { name: "Ngee Ann City", where: "Musollah · B2, carpark lift lobby C", meta: "Confirmed 3 weeks ago", min: 5, kind: "musollah" },
+  { name: "Masjid Al-Falah", where: "22 Bideford Road", meta: "Jumu'ah 12.30 pm and 1.45 pm", min: 6, kind: "masjid" },
+  { name: "Paragon", where: "Prayer room · B1, behind the loading bay", meta: "Confirmed 1 month ago", min: 8, kind: "musollah" },
+  { name: "Masjid Sultan", where: "3 Muscat Street, Kampong Glam", meta: "Open daily 5.30 am – 9.00 pm", min: 14, kind: "masjid" }
+];
+
+const DZIKIR = [
+  { name: "Subhanallah", meaning: "Glory be to Allah", target: 33 },
+  { name: "Alhamdulillah", meaning: "All praise is due to Allah", target: 33 },
+  { name: "Allahu Akbar", meaning: "Allah is the greatest", target: 34 },
+  { name: "Astaghfirullah", meaning: "I seek forgiveness from Allah", target: 100 }
+];
+
+const ACCENT = "#5980a6", INK = "#1d1f20", MUTED = "rgba(29,31,32,.45)", DIV = "rgba(29,31,32,.16)";
+
+class Component extends DCLogic {
+  state = {
+    screen: "home",
+    open: "Asar",
+    dz: 0, dzCount: 12, dzRounds: 0,
+    day: { Subuh: "done", Zohor: "done", Asar: "pending", Maghrib: "pending", Isyak: "pending" },
+    qadha: { Subuh: 9, Zohor: 4, Asar: 6, Maghrib: 1, Isyak: 3 },
+    now: 16 * 3600 + 2 * 60 + 14,
+    filter: "all",
+    lead: 15,
+    on: { Subuh: true, Zohor: true, Asar: true, Maghrib: true, Isyak: true, Syuruk: false }
+  };
+
+  componentDidMount() {
+    this.timer = setInterval(() => this.setState(s => ({ now: s.now + 1 })), 1000);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  go = (screen) => () => this.setState({ screen });
+
+  // pending → done → missed → pending; entering "missed" adds a qadha, leaving it pays one back
+  cycle = (name) => () => this.setState(s => {
+    const cur = s.day[name] || "pending";
+    const nextSt = cur === "pending" ? "done" : cur === "done" ? "missed" : "pending";
+    const q = Object.assign({}, s.qadha);
+    if (nextSt === "missed") q[name] = (q[name] || 0) + 1;
+    if (cur === "missed") q[name] = Math.max(0, (q[name] || 0) - 1);
+    return { day: Object.assign({}, s.day, { [name]: nextSt }), qadha: q };
+  });
+
+  // time left until the haul completes — 15 days from the simulated "now"
+  haul(now) {
+    const total = 15 * 86400 - (now - (16 * 3600 + 2 * 60 + 14));
+    const d = Math.floor(total / 86400), h = Math.floor((total % 86400) / 3600),
+      m = Math.floor((total % 3600) / 60), s = total % 60;
+    return d + "d " + String(h).padStart(2, "0") + "h " + String(m).padStart(2, "0") + "m " + String(s).padStart(2, "0") + "s";
+  }
+
+  fmt(sec) {
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return (h > 0 ? h + "h " : "") + String(m).padStart(2, "0") + "m " + String(s).padStart(2, "0") + "s";
+  }
+
+  clock(sec) {
+    let h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
+    const ap = h >= 12 ? "pm" : "am"; h = h % 12 || 12;
+    return h + "." + String(m).padStart(2, "0") + " " + ap;
+  }
+
+  renderVals() {
+    const { screen, now, filter, lead, on } = this.state;
+    const real = PRAYERS.filter(p => p.name !== "Syuruk");
+    let nextIdx = real.findIndex(p => p.sec > now);
+    if (nextIdx < 0) nextIdx = 0;
+    const next = real[nextIdx];
+    const prev = real[(nextIdx - 1 + real.length) % real.length];
+    const span = Math.max(1, next.sec - prev.sec);
+    const progress = Math.max(0, Math.min(100, ((now - prev.sec) / span) * 100));
+
+    const pick = (a, active) => active ? ACCENT : a;
+    const seg = (active) => ({
+      border: active ? ACCENT : DIV,
+      bg: active ? ACCENT : "transparent",
+      ink: active ? "#f2f2f3" : INK
+    });
+    const fAll = seg(filter === "all"), fMall = seg(filter === "musollah"), fMasjid = seg(filter === "masjid");
+    const l10 = seg(lead === 10), l15 = seg(lead === 15), l30 = seg(lead === 30);
+
+    const tabInk = (s) => screen === s ? INK : "rgba(29,31,32,.45)";
+    const tabBar = (s) => screen === s ? ACCENT : "transparent";
+
+    return {
+      isOnboard: screen === "onboard", isHome: screen === "home", isTimes: screen === "times",
+      isNearby: screen === "nearby", isSpace: screen === "space", isQibla: screen === "qibla",
+      isMore: screen === "more", isRemind: screen === "remind", isSubmit: screen === "submit",
+      isRamadan: screen === "ramadan", isWidgets: screen === "widgets", isQadha: screen === "qadha",
+      isZakat: screen === "zakat", isDzikir: screen === "dzikir",
+      goQadha: this.go("qadha"), goZakat: this.go("zakat"), goDzikir: this.go("dzikir"),
+
+      dzName: DZIKIR[this.state.dz].name,
+      dzMeaning: DZIKIR[this.state.dz].meaning,
+      dzCount: this.state.dzCount,
+      dzTarget: DZIKIR[this.state.dz].target,
+      dzRounds: this.state.dzRounds,
+      dzProgress: Math.min(100, (this.state.dzCount / DZIKIR[this.state.dz].target) * 100).toFixed(1) + "%",
+      dzTap: () => this.setState(s => {
+        const t = DZIKIR[s.dz].target;
+        if (s.dzCount + 1 >= t) {
+          const last = s.dz === DZIKIR.length - 1;
+          return { dzCount: 0, dz: last ? 0 : s.dz + 1, dzRounds: last ? s.dzRounds + 1 : s.dzRounds };
+        }
+        return { dzCount: s.dzCount + 1 };
+      }),
+      dzBack: () => this.setState(s => ({ dzCount: Math.max(0, s.dzCount - 1) })),
+      dzReset: () => this.setState({ dzCount: 0, dz: 0, dzRounds: 0 }),
+      dzList: DZIKIR.map((d, i) => ({
+        name: d.name, target: d.target,
+        pick: () => this.setState({ dz: i, dzCount: 0 }),
+        border: i === this.state.dz ? ACCENT : "rgba(148,188,227,.4)",
+        bg: i === this.state.dz ? ACCENT : "transparent",
+        ink: i === this.state.dz ? "#f2f2f3" : "rgba(242,242,243,.7)"
+      })),
+      haulCount: this.haul(now), haulProgress: (((354 - 15) / 354) * 100).toFixed(1) + "%",
+      showTabs: ["home", "times", "nearby", "qibla", "more"].indexOf(screen) >= 0,
+
+      goOnboard: this.go("onboard"), goHome: this.go("home"), goTimes: this.go("times"),
+      goNearby: this.go("nearby"), goSpace: this.go("space"), goQibla: this.go("qibla"),
+      goMore: this.go("more"), goRemind: this.go("remind"), goSubmit: this.go("submit"),
+      goRamadan: this.go("ramadan"), goWidgets: this.go("widgets"),
+
+      nextName: next.name, nextTime: next.time, prevName: prev.name, prevTime: prev.time,
+      countdown: this.fmt(Math.max(0, next.sec - now)),
+      nowLabel: this.clock(now),
+      progress: progress.toFixed(1) + "%",
+
+      prayers: real.map(p => {
+        const st = this.state.day[p.name] || "pending";
+        const style = st === "done"
+          ? { label: "Done", ink: "#f2f2f3", bg: ACCENT, border: ACCENT }
+          : st === "missed"
+            ? { label: "Missed", ink: "#f2f2f3", bg: "#1d2d3d", border: "#1d2d3d" }
+            : { label: "Mark", ink: "rgba(29,31,32,.5)", bg: "transparent", border: DIV };
+        return {
+          name: p.name, time: p.time,
+          ink: p.name === next.name ? INK : "rgba(29,31,32,.5)",
+          dot: p.name === next.name ? ACCENT : "rgba(29,31,32,.2)",
+          mark: this.cycle(p.name),
+          label: style.label, sInk: style.ink, sBg: style.bg, sBorder: style.border
+        };
+      }),
+      doneCount: real.filter(p => this.state.day[p.name] === "done").length,
+      missedCount: real.filter(p => this.state.day[p.name] === "missed").length,
+      pendingCount: real.filter(p => (this.state.day[p.name] || "pending") === "pending").length,
+      qadhaTotal: real.reduce((n, p) => n + (this.state.qadha[p.name] || 0), 0),
+      qadhaRows: real.map(p => {
+        const c = this.state.qadha[p.name] || 0;
+        return {
+          name: p.name, count: c,
+          bar: Math.min(100, c * 8) + "%",
+          ink: c > 0 ? INK : "rgba(29,31,32,.35)",
+          btnBg: c > 0 ? ACCENT : "transparent",
+          btnInk: c > 0 ? "#f2f2f3" : "rgba(29,31,32,.35)",
+          btnBorder: c > 0 ? ACCENT : DIV,
+          pay: () => { if (c > 0) this.setState(s => ({ qadha: Object.assign({}, s.qadha, { [p.name]: s.qadha[p.name] - 1 }) })); }
+        };
+      }),
+      monthDays: Array.from({ length: 31 }, (_, i) => {
+        const d = i + 1;
+        const missed = [2, 3, 7, 11, 12, 18, 21, 22, 23, 29].indexOf(d) >= 0;
+        const future = d > 10;
+        return {
+          n: d,
+          bg: future ? "transparent" : (missed ? "#1d2d3d" : "rgba(89,128,166,.18)"),
+          ink: future ? "rgba(29,31,32,.3)" : (missed ? "#f2f2f3" : "#1d1f20")
+        };
+      }),
+      fullDay: PRAYERS.map(p => ({
+        name: p.name, time: p.time, note: p.note,
+        ink: p.name === next.name ? ACCENT : INK,
+        open: this.state.open === p.name,
+        toggle: () => this.setState(s => ({ open: s.open === p.name ? null : p.name })),
+        caret: this.state.open === p.name ? "\u2212" : "+",
+        sunnahCount: p.sunnah.length === 1 ? p.sunnah[0].when.toLowerCase() + " · " + p.sunnah[0].rak
+          : p.sunnah[0].rak + " before · " + p.sunnah[1].rak + " after",
+        sunnah: p.sunnah
+      })),
+      spaces: SPACES.filter(s => filter === "all" || s.kind === filter),
+
+      fAllBorder: fAll.border, fAllBg: fAll.bg, fAllInk: fAll.ink,
+      fMallBorder: fMall.border, fMallBg: fMall.bg, fMallInk: fMall.ink,
+      fMasjidBorder: fMasjid.border, fMasjidBg: fMasjid.bg, fMasjidInk: fMasjid.ink,
+      setAll: () => this.setState({ filter: "all" }),
+      setMall: () => this.setState({ filter: "musollah" }),
+      setMasjid: () => this.setState({ filter: "masjid" }),
+
+      l10Border: l10.border, l10Bg: l10.bg, l10Ink: l10.ink,
+      l15Border: l15.border, l15Bg: l15.bg, l15Ink: l15.ink,
+      l30Border: l30.border, l30Bg: l30.bg, l30Ink: l30.ink,
+      setLead10: () => this.setState({ lead: 10 }),
+      setLead15: () => this.setState({ lead: 15 }),
+      setLead30: () => this.setState({ lead: 30 }),
+
+      toggles: PRAYERS.map(p => {
+        const active = !!on[p.name];
+        return {
+          name: p.name,
+          sub: p.name === "Syuruk" ? "End of the Subuh window" : (active ? "Vibrate at waktu · nudge " + lead + " min before" : "Off"),
+          toggle: () => this.setState(s => ({ on: Object.assign({}, s.on, { [p.name]: !s.on[p.name] }) })),
+          border: active ? ACCENT : DIV,
+          bg: active ? ACCENT : "transparent",
+          knob: active ? "23px" : "3px",
+          knobBg: active ? "#f2f2f3" : "rgba(29,31,32,.35)"
+        };
+      }),
+      muted: MUTED, pick,
+
+      tHome: tabBar("home"), tTimes: tabBar("times"), tNearby: tabBar("nearby"),
+      tQibla: tabBar("qibla"), tMore: tabBar("more"),
+      tHomeInk: tabInk("home"), tTimesInk: tabInk("times"), tNearbyInk: tabInk("nearby"),
+      tQiblaInk: tabInk("qibla"), tMoreInk: tabInk("more")
+    };
+  }
+}
+
+</script>
+</body>
+</html>
