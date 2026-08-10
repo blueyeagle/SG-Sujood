@@ -144,10 +144,12 @@ struct ZakatView: View {
     }
 
     private var history: some View {
-        VStack(alignment: .leading, spacing: Space.s3) {
+        // Show the most recent 12 months; the full series stays in nisab.json.
+        let recent = Array(nisab.history.prefix(12))
+        return VStack(alignment: .leading, spacing: Space.s3) {
             CapsLabel("Recent months")
             VStack(spacing: 0) {
-                ForEach(Array(nisab.history.enumerated()), id: \.offset) { idx, row in
+                ForEach(Array(recent.enumerated()), id: \.offset) { idx, row in
                     if idx > 0 { Hairline() }
                     HStack {
                         Text(row.month).font(Font2.body(14)).foregroundStyle(Palette.text)
