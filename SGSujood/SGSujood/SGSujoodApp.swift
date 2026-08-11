@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct WaqtSGApp: App {
+struct SGSujoodApp: App {
     @StateObject private var state = AppState()
     @StateObject private var nisab = NisabStore()
     @StateObject private var spacesStore = SpacesStore()
@@ -13,7 +13,7 @@ struct WaqtSGApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if let screen = ProcessInfo.processInfo.environment["WAQT_SCREEN"] {
+                if let screen = ProcessInfo.processInfo.environment["SGSUJOOD_SCREEN"] {
                     DebugScreen(name: screen)          // UI-verification hook (launch env only)
                 } else if state.onboarded {
                     RootShell()
@@ -38,7 +38,7 @@ struct WaqtSGApp: App {
 }
 
 // Renders a single screen for headless screenshot verification. Reached only when the
-// WAQT_SCREEN launch environment variable is set; never wired into the shipping UI.
+// SGSUJOOD_SCREEN launch environment variable is set; never wired into the shipping UI.
 struct DebugScreen: View {
     let name: String
     var body: some View {

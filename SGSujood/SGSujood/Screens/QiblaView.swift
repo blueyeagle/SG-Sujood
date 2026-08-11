@@ -181,7 +181,7 @@ final class HeadingProvider: NSObject, ObservableObject, CLLocationManagerDelega
         super.init()
         manager.delegate = self
         // Verification hook: seed a heading on the Simulator (no magnetometer). Launch env only.
-        if let v = ProcessInfo.processInfo.environment["WAQT_QIBLA_HEADING"], let d = Double(v) {
+        if let v = ProcessInfo.processInfo.environment["SGSUJOOD_QIBLA_HEADING"], let d = Double(v) {
             degrees = d; hasHeading = true; return
         }
         if CLLocationManager.headingAvailable() {

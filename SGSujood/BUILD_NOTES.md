@@ -106,6 +106,6 @@ The rest is still placeholder per the handoff's "Content caveats". Before shippi
 
 ## Note
 
-`WaqtSGApp.swift` contains a `DebugScreen` reachable only via the `WAQT_SCREEN` launch
+`SGSujoodApp.swift` contains a `DebugScreen` reachable only via the `SGSUJOOD_SCREEN` launch
 environment variable — used for headless screenshot verification, never wired into the
 shipping UI. Safe to delete.
