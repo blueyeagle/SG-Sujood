@@ -35,6 +35,15 @@ https://raw.githubusercontent.com/blueyeagle/SG-Sujood/main/nisab.json
 prepend the same entry to `history` — then commit. Keep this repo public so the raw URL
 serves without a token.
 
+## Prayer-space submissions
+
+"Add a space" in the app posts to a small backend ([`backend/`](backend/) — a Cloudflare
+Worker) that opens a GitHub issue; the [`space-submission`](.github/workflows/space-submission.yml)
+Action appends the row to [`Prayer Space for Review.xlsx`](Prayer%20Space%20for%20Review.xlsx)
+and closes the issue. Deploy steps are in [`backend/README.md`](backend/README.md). Until the
+backend URL is set in `SubmissionService.swift`, the app falls back to opening a prefilled
+GitHub issue in the browser.
+
 ## Prayer spaces (remote config)
 
 [`spaces.json`](spaces.json) lists 165 prayer spaces (mosques + musollah) with coordinates

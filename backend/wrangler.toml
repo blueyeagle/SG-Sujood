@@ -1,0 +1,8 @@
+name = "waqtsg-submit"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# Non-secret variable. Set the secret separately (see README):
+#   npx wrangler secret put GITHUB_TOKEN
+[vars]
+REPO = "blueyeagle/SG-Sujood"

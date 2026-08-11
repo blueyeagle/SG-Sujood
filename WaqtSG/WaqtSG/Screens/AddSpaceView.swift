@@ -8,8 +8,10 @@ struct AddSpaceView: View {
     @State private var walkTime = ""
     @State private var type: SpaceType = .musollah
 
-    @State private var showSubmitted = false
+    @State private var showSubmitted = false      // backend accepted
+    @State private var showOpenedGitHub = false    // fallback: browser issue opened
     @State private var showFailAlert = false
+    @State private var submitting = false
 
     // Submissions are logged to "Prayer Space for Review.xlsx" in the repo. The app opens a
     // prefilled GitHub issue (no secret token in the app); a GitHub Action parses it and
@@ -40,9 +42,25 @@ struct AddSpaceView: View {
     }
 
     private func submit() {
+        // Preferred: POST to the backend (anyone can submit, no GitHub account).
+        if SubmissionService.isConfigured {
+            submitting = true
+            Task {
+                let ok = await SubmissionService.submit(
+                    building: building, floor: floorLandmark, walk: walkTime, type: type.rawValue)
+                submitting = false
+                if ok { showSubmitted = true } else { openGitHubFallback() }
+            }
+        } else {
+            openGitHubFallback()
+        }
+    }
+
+    // Fallback when no backend is set (or it's unreachable): open a prefilled GitHub issue.
+    private func openGitHubFallback() {
         guard let url = githubIssueURL() else { showFailAlert = true; return }
         openURL(url) { accepted in
-            if accepted { showSubmitted = true } else { showFailAlert = true }
+            if accepted { showOpenedGitHub = true } else { showFailAlert = true }
         }
     }
 
@@ -86,11 +104,11 @@ struct AddSpaceView: View {
                 .overlay(Rectangle().stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
                     .foregroundStyle(Palette.divider))
 
-                PrimaryButton(title: "Submit for review") { submit() }
-                    .disabled(building.isEmpty)
-                    .opacity(building.isEmpty ? 0.5 : 1)
+                PrimaryButton(title: submitting ? "Submitting…" : "Submit for review") { submit() }
+                    .disabled(building.isEmpty || submitting)
+                    .opacity(building.isEmpty || submitting ? 0.5 : 1)
 
-                Text("Submitting opens a prefilled entry on GitHub — tap “Submit new issue” there to log it to the moderator's review workbook. A moderator checks new spaces within two days.")
+                Text("Your submission goes to the moderator's review workbook. A moderator checks new spaces within two days.")
                     .font(Font2.body(12))
                     .foregroundStyle(Palette.mutedInk)
                     .lineSpacing(2)
@@ -100,15 +118,20 @@ struct AddSpaceView: View {
         }
         .background(Palette.bg)
         .navigationBarBackButtonHidden(true)
-        .alert("Opening GitHub", isPresented: $showSubmitted) {
+        .alert("Submitted", isPresented: $showSubmitted) {
+            Button("Done") { dismiss() }
+        } message: {
+            Text("Thanks — your prayer space was sent to the moderator's review workbook.")
+        }
+        .alert("Opening GitHub", isPresented: $showOpenedGitHub) {
             Button("Done") { dismiss() }
         } message: {
             Text("Tap “Submit new issue” on the page that just opened to log your space to the review workbook.")
         }
-        .alert("Couldn't open", isPresented: $showFailAlert) {
+        .alert("Couldn't submit", isPresented: $showFailAlert) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Could not open the submission page. Check your connection and try again.")
+            Text("Could not send your submission. Check your connection and try again.")
         }
     }
 
