@@ -6,19 +6,19 @@ spaces and everyday worship tools for Muslims in Singapore.
 ## Open & run
 
 ```bash
-open "WaqtSG.xcodeproj"
+open "SGSujood.xcodeproj"
 ```
 
 Then pick an iPhone simulator and press ⌘R. Command-line build:
 
 ```bash
-xcodebuild -project WaqtSG.xcodeproj -scheme WaqtSG -sdk iphonesimulator \
+xcodebuild -project SGSujood.xcodeproj -scheme SGSujood -sdk iphonesimulator \
   -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
 Requires Xcode 16+ (built and verified on Xcode 26.6, iOS 26.5 simulator). Deployment
 target iOS 17. The project uses a **synchronized file group**, so new files dropped into
-`WaqtSG/` are picked up automatically — no pbxproj editing.
+`SGSujood/` are picked up automatically — no pbxproj editing.
 
 ## What's implemented
 
@@ -41,7 +41,7 @@ All 13 screens from the handoff, native, with the Industry design system:
 Design system lives in `Theme.swift`, `Blueprint.swift`, `Components.swift`: exact color
 tokens, the 3.4-based spacing scale, square corners everywhere, the blueprint frame with
 corner registration marks, and the type-only tab bar. **Barlow / Barlow Condensed** (OFL)
-are bundled in `WaqtSG/Fonts/` and registered at launch (`FontRegistrar.swift`).
+are bundled in `SGSujood/Fonts/` and registered at launch (`FontRegistrar.swift`).
 
 ## Data
 

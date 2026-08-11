@@ -8,7 +8,7 @@ Ramadan mode. Built from the design handoff in [`design_handoff_waqt_sg/`](desig
 
 | Path | What |
 | --- | --- |
-| [`WaqtSG/`](WaqtSG/) | The Xcode project. Open `WaqtSG/WaqtSG.xcodeproj` and ⌘R. See [`WaqtSG/BUILD_NOTES.md`](WaqtSG/BUILD_NOTES.md). |
+| [`SGSujood/`](SGSujood/) | The Xcode project. Open `SGSujood/SGSujood.xcodeproj` and ⌘R. See [`SGSujood/BUILD_NOTES.md`](SGSujood/BUILD_NOTES.md). |
 | [`nisab.json`](nisab.json) | **Live nisab config** the app fetches (see below). |
 | [`spaces.json`](spaces.json) | **Live prayer-space directory** (165 spaces, geocoded) the app fetches. |
 | [`SG Prayer Spaces.xlsx`](SG%20Prayer%20Spaces.xlsx) | Source workbook for the directory. |
@@ -18,7 +18,7 @@ Ramadan mode. Built from the design handoff in [`design_handoff_waqt_sg/`](desig
 ## Prayer times
 
 Real MUIS 2026 times for all 365 days, parsed from the PDF into
-`WaqtSG/WaqtSG/prayer_times_2026.json`. Refresh annually with the next year's timetable.
+`SGSujood/SGSujood/prayer_times_2026.json`. Refresh annually with the next year's timetable.
 
 ## Nisab (remote config)
 
@@ -60,4 +60,4 @@ bundled copy. Edit and commit to add/correct a listing without an app release.
 ---
 
 *Prayer times, the nisab, the space directory and the sunnah/niat content should be verified
-against MUIS / a religious authority before public release. See `WaqtSG/BUILD_NOTES.md`.*
+against MUIS / a religious authority before public release. See `SGSujood/BUILD_NOTES.md`.*
