@@ -90,20 +90,20 @@ enum SampleData {
     // For congregation add "ma'muman" (as makmum) or "imaman" (as imam) before "lillahi ta'ala".
     static let fardhuNiat: [WaktuRow: Niat] = [
         .subuh: Niat(title: "Fardhu · 2 rakaat",
-            transliteration: "Usalli fardas Subhi rak'ataini mustaqbilal qiblati adaa'an lillahi ta'ala.",
-            meaning: "I intend to pray the fardhu of Subuh, two rakaat, facing the qibla, on time, for Allah Ta'ala."),
+            transliteration: "Usalli fardas Subhi rak'ataini adaa'an lillahi ta'ala.",
+            meaning: "I intend to pray the fardhu of Subuh, two rakaat, on time, for Allah Ta'ala."),
         .zohor: Niat(title: "Fardhu · 4 rakaat",
-            transliteration: "Usalli fardaz Zuhri arba'a raka'atin mustaqbilal qiblati adaa'an lillahi ta'ala.",
-            meaning: "I intend to pray the fardhu of Zohor, four rakaat, facing the qibla, on time, for Allah Ta'ala."),
+            transliteration: "Usalli fardaz Zuhri arba'a raka'atin adaa'an lillahi ta'ala.",
+            meaning: "I intend to pray the fardhu of Zohor, four rakaat, on time, for Allah Ta'ala."),
         .asar: Niat(title: "Fardhu · 4 rakaat",
-            transliteration: "Usalli fardal 'Asri arba'a raka'atin mustaqbilal qiblati adaa'an lillahi ta'ala.",
-            meaning: "I intend to pray the fardhu of Asar, four rakaat, facing the qibla, on time, for Allah Ta'ala."),
+            transliteration: "Usalli fardal 'Asri arba'a raka'atin adaa'an lillahi ta'ala.",
+            meaning: "I intend to pray the fardhu of Asar, four rakaat, on time, for Allah Ta'ala."),
         .maghrib: Niat(title: "Fardhu · 3 rakaat",
-            transliteration: "Usalli fardal Maghribi thalatha raka'atin mustaqbilal qiblati adaa'an lillahi ta'ala.",
-            meaning: "I intend to pray the fardhu of Maghrib, three rakaat, facing the qibla, on time, for Allah Ta'ala."),
+            transliteration: "Usalli fardal Maghribi thalatha raka'atin adaa'an lillahi ta'ala.",
+            meaning: "I intend to pray the fardhu of Maghrib, three rakaat, on time, for Allah Ta'ala."),
         .isyak: Niat(title: "Fardhu · 4 rakaat",
-            transliteration: "Usalli fardal 'Isyaa'i arba'a raka'atin mustaqbilal qiblati adaa'an lillahi ta'ala.",
-            meaning: "I intend to pray the fardhu of Isyak, four rakaat, facing the qibla, on time, for Allah Ta'ala."),
+            transliteration: "Usalli fardal 'Isyaa'i arba'a raka'atin adaa'an lillahi ta'ala.",
+            meaning: "I intend to pray the fardhu of Isyak, four rakaat, on time, for Allah Ta'ala."),
     ]
 
     // MARK: - Dua Qunut (recited in the second rakaat of Subuh, Shafi'i)
