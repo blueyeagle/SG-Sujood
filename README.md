@@ -44,6 +44,12 @@ and closes the issue. Deploy steps are in [`backend/README.md`](backend/README.m
 backend URL is set in `SubmissionService.swift`, the app falls back to opening a prefilled
 GitHub issue in the browser.
 
+**Moderating (approve → publish):** open `Prayer Space for Review.xlsx`, set a row's **Status**
+to `Approved`, commit & push. The [`publish-spaces`](.github/workflows/publish-spaces.yml)
+Action geocodes the building via OneMap, appends it to `spaces.json` (which the app fetches
+live), and flips the row to `Published`. Rows it can't geocode become `Needs address`; verify
+the coordinates/region afterwards and refine `spaces.json` if needed.
+
 ## Prayer spaces (remote config)
 
 [`spaces.json`](spaces.json) lists 165 prayer spaces (mosques + musollah) with coordinates

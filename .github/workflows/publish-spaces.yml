@@ -1,0 +1,44 @@
+name: Publish approved spaces
+
+# When the review workbook changes (a moderator set a row's Status to "Approved"), geocode
+# and append approved rows to spaces.json — which the app fetches live. No secrets needed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Prayer Space for Review.xlsx'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-spaces
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install openpyxl
+
+      - name: Publish approved submissions
+        run: python .github/scripts/publish_spaces.py
+
+      - name: Commit changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add spaces.json "Prayer Space for Review.xlsx"
+          if git diff --cached --quiet; then
+            echo "No approved rows to publish."
+          else
+            git commit -m "Publish approved prayer space(s) to spaces.json"
+            git push
+          fi
