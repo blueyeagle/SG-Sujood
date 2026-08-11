@@ -11,15 +11,21 @@ final class AppState: ObservableObject {
     // Clock — drives countdown, next-waktu and progress rail
     @Published var now: Date = Date()
 
-    // Fardhu tracker (per calendar day) — all start unmarked ("Mark").
-    @Published var dayLog: [Prayer: PrayerStatus] = [
-        .subuh: .pending, .zohor: .pending, .asar: .pending, .maghrib: .pending, .isyak: .pending
-    ]
+    // Fardhu tracker (per calendar day) — all start unmarked ("Mark"). Persisted; resets on a new day.
+    @Published var dayLog: [Prayer: PrayerStatus] = AppState.emptyDayLog {
+        didSet { persistDayLog() }
+    }
 
-    // Qadha counts (month-scoped) — start at 0; only rise when a prayer is marked missed.
+    // Qadha counts — start at 0; rise only when a prayer is marked missed; persist until recorded.
     @Published var qadha: [Prayer: Int] = [
         .subuh: 0, .zohor: 0, .asar: 0, .maghrib: 0, .isyak: 0
-    ]
+    ] {
+        didSet { persistQadha() }
+    }
+
+    static var emptyDayLog: [Prayer: PrayerStatus] {
+        [.subuh: .pending, .zohor: .pending, .asar: .pending, .maghrib: .pending, .isyak: .pending]
+    }
 
     // Nearby
     @Published var spaceFilter: SpaceFilter = .all
@@ -52,6 +58,11 @@ final class AppState: ObservableObject {
         didSet { UserDefaults.standard.set(haulStartDate.timeIntervalSince1970, forKey: Self.kHaulStart) }
     }
 
+    private static let kQadha = "tracker.qadha"
+    private static let kDayLog = "tracker.dayLog"
+    private static let kDayLogDate = "tracker.dayLogDate"
+    private var currentDayKey = ""
+
     private var timer: AnyCancellable?
 
     init() {
@@ -62,13 +73,63 @@ final class AppState: ObservableObject {
         } else {
             haulStartDate = AppState.makeDate(2025, 9, 5)   // default seed
         }
+
+        // Restore persisted qadha (property observers don't fire during init).
+        if let stored = d.dictionary(forKey: Self.kQadha) as? [String: Int] {
+            var q = qadha
+            for (k, v) in stored { if let p = Prayer(rawValue: k) { q[p] = v } }
+            qadha = q
+        }
+        // Restore today's tracker only if it belongs to today; otherwise start fresh.
+        let today = AppState.dayKey(Date())
+        currentDayKey = today
+        if d.string(forKey: Self.kDayLogDate) == today,
+           let stored = d.dictionary(forKey: Self.kDayLog) as? [String: String] {
+            var log = AppState.emptyDayLog
+            for (k, v) in stored {
+                if let p = Prayer(rawValue: k), let s = PrayerStatus(rawValue: v) { log[p] = s }
+            }
+            dayLog = log
+        }
+
         start()
     }
 
     func start() {
         timer = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
-            .sink { [weak self] date in self?.now = date }
+            .sink { [weak self] date in
+                guard let self else { return }
+                self.now = date
+                self.rolloverIfNeeded()
+            }
+    }
+
+    // MARK: - Persistence
+
+    static func dayKey(_ date: Date) -> String {
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f.string(from: date)
+    }
+
+    private func persistQadha() {
+        let dict = Dictionary(uniqueKeysWithValues: qadha.map { ($0.key.rawValue, $0.value) })
+        UserDefaults.standard.set(dict, forKey: Self.kQadha)
+    }
+    private func persistDayLog() {
+        let dict = Dictionary(uniqueKeysWithValues: dayLog.map { ($0.key.rawValue, $0.value.rawValue) })
+        UserDefaults.standard.set(dict, forKey: Self.kDayLog)
+        UserDefaults.standard.set(currentDayKey, forKey: Self.kDayLogDate)
+    }
+
+    /// When the calendar day changes while the app is open, reset the tracker (missed prayers
+    /// are already counted in qadha). Does nothing until an actual day change.
+    private func rolloverIfNeeded() {
+        let key = AppState.dayKey(now)
+        guard key != currentDayKey else { return }
+        currentDayKey = key
+        dayLog = AppState.emptyDayLog
     }
 
     enum SpaceFilter: String, CaseIterable { case all = "All", musollah = "Musollah", masjid = "Masjid" }
