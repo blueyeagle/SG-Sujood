@@ -94,12 +94,35 @@ struct TimetableView: View {
                     ForEach(SampleData.sunnah[row] ?? []) { s in
                         sunnahBlock(s)
                     }
+                    if row == .subuh {
+                        qunutBlock(SampleData.duaQunut)
+                    }
                 }
                 .padding(.bottom, Space.s4)
             }
         }
         .padding(.horizontal, Space.s4)
         .contentShape(Rectangle())
+    }
+
+    private func qunutBlock(_ q: Niat) -> some View {
+        HStack(alignment: .top, spacing: Space.s3) {
+            Rectangle().fill(Palette.accent).frame(width: 2)
+            VStack(alignment: .leading, spacing: 6) {
+                CapsLabel(q.title, color: Palette.accent700, size: 10)
+                Text("“\(q.transliteration)”")
+                    .font(Font2.body(13))
+                    .italic()
+                    .foregroundStyle(Palette.accent700)
+                    .lineSpacing(2)
+                Text(q.meaning)
+                    .font(Font2.body(12.5))
+                    .foregroundStyle(Palette.mutedInk)
+                    .lineSpacing(2)
+            }
+        }
+        .padding(.vertical, Space.s2)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func expander(_ row: WaktuRow, expanded: Bool) -> some View {

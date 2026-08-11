@@ -3,10 +3,17 @@ import SwiftUI
 struct QadhaView: View {
     @EnvironmentObject var state: AppState
 
-    // A plausible month pattern for the day grid (1...31). complete / missed / future.
-    private let daysInMonth = 31
-    private let today = 10
-    private let missedDays: Set<Int> = [2, 3, 7, 9]   // one or more missed
+    // Day grid reflects the current month. There's no persisted per-day history yet, so past
+    // days read as complete and today turns "missed" only if a prayer is marked missed today.
+    private var daysInMonth: Int {
+        Calendar.current.range(of: .day, in: .month, for: state.now)?.count ?? 30
+    }
+    private var today: Int {
+        Calendar.current.component(.day, from: state.now)
+    }
+    private var missedDays: Set<Int> {
+        state.missedCount > 0 ? [today] : []
+    }
 
     var body: some View {
         ScrollView {

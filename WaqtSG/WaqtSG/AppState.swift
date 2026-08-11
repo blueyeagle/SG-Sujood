@@ -11,14 +11,14 @@ final class AppState: ObservableObject {
     // Clock — drives countdown, next-waktu and progress rail
     @Published var now: Date = Date()
 
-    // Fardhu tracker (per calendar day)
+    // Fardhu tracker (per calendar day) — all start unmarked ("Mark").
     @Published var dayLog: [Prayer: PrayerStatus] = [
-        .subuh: .done, .zohor: .done, .asar: .pending, .maghrib: .pending, .isyak: .pending
+        .subuh: .pending, .zohor: .pending, .asar: .pending, .maghrib: .pending, .isyak: .pending
     ]
 
-    // Qadha counts (month-scoped)
+    // Qadha counts (month-scoped) — start at 0; only rise when a prayer is marked missed.
     @Published var qadha: [Prayer: Int] = [
-        .subuh: 9, .zohor: 4, .asar: 6, .maghrib: 2, .isyak: 2
+        .subuh: 0, .zohor: 0, .asar: 0, .maghrib: 0, .isyak: 0
     ]
 
     // Nearby
