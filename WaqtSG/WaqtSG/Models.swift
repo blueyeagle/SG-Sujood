@@ -79,6 +79,17 @@ struct Niat: Identifiable {
     let meaning: String
 }
 
+// A titled group of niat (e.g. "Solat Sunat") for the Niat Solat reference page.
+struct NiatGroup: Identifiable {
+    let id = UUID()
+    let title: String
+    let note: String?
+    let items: [Niat]
+    init(_ title: String, note: String? = nil, _ items: [Niat]) {
+        self.title = title; self.note = note; self.items = items
+    }
+}
+
 // MARK: - Terawih (Ramadan)
 
 struct TerawihEntry: Identifiable {
