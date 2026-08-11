@@ -184,8 +184,8 @@
 				DEVELOPMENT_TEAM = W5UX2WF4RR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Waqt SG";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Waqt SG uses your location on device to match prayer times to your area and sort nearby prayer spaces by walking distance. Your location is never uploaded.";
+				INFOPLIST_KEY_CFBundleDisplayName = "SG Sujood";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "SG Sujood uses your location on device to match prayer times to your area and sort nearby prayer spaces by walking distance. Your location is never uploaded.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -215,8 +215,8 @@
 				DEVELOPMENT_TEAM = W5UX2WF4RR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Waqt SG";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Waqt SG uses your location on device to match prayer times to your area and sort nearby prayer spaces by walking distance. Your location is never uploaded.";
+				INFOPLIST_KEY_CFBundleDisplayName = "SG Sujood";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "SG Sujood uses your location on device to match prayer times to your area and sort nearby prayer spaces by walking distance. Your location is never uploaded.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

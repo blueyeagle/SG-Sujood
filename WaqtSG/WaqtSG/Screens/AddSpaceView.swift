@@ -28,7 +28,7 @@ struct AddSpaceView: View {
         Walk from nearest MRT exit: \(walkTime)
         Type: \(type.rawValue)
 
-        _Submitted from Waqt SG — a moderator will review before it's added._
+        _Submitted from SG Sujood — a moderator will review before it's added._
         """
     }
 

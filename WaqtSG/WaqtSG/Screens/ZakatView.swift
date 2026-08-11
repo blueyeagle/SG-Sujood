@@ -89,7 +89,7 @@ struct ZakatView: View {
                     ) { ok in
                         reminderAlert = ok
                             ? "We'll remind you on the morning of \(state.longDate(due))."
-                            : "Couldn't set the reminder — enable notifications for Waqt SG in Settings."
+                            : "Couldn't set the reminder — enable notifications for SG Sujood in Settings."
                     }
                 }
             }

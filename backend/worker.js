@@ -1,4 +1,4 @@
-// Waqt SG — prayer-space submission endpoint (Cloudflare Worker).
+// SG Sujood — prayer-space submission endpoint (Cloudflare Worker).
 //
 // Receives a JSON POST from the app and opens a GitHub issue in the repo using a token that
 // lives ONLY here (never in the app). The repo's "space-submission" GitHub Action then
@@ -42,7 +42,7 @@ export default {
       `Walk from nearest MRT exit: ${walk}`,
       `Type: ${type}`,
       "",
-      "_Submitted from Waqt SG (app backend)._",
+      "_Submitted from SG Sujood (app backend)._",
     ].join("\n");
 
     const res = await fetch(`https://api.github.com/repos/${env.REPO}/issues`, {

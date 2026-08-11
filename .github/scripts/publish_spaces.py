@@ -104,7 +104,7 @@ for row in ws.iter_rows(min_row=2):
         "floor": (row[i_floor].value or None), "genderSegregated": None,
         "facilities": None, "access": "Public", "capacity": None,
         "yearEst": None, "heritage": None,
-        "notes": "Community submitted via Waqt SG.",
+        "notes": "Community submitted via SG Sujood.",
         "lat": geo["lat"], "lng": geo["lng"],
     }
     data["spaces"].append(rec)

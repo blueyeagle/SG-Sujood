@@ -11,7 +11,7 @@ struct OnboardingView: View {
             Palette.accent900.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: Space.s6) {
-                    CapsLabel("Waqt SG", color: Palette.accent400, size: 12)
+                    CapsLabel("SG Sujood", color: Palette.accent400, size: 12)
                         .padding(.top, 24)
 
                     Text("Know the time.\nKnow the room.")
