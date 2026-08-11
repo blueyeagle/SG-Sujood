@@ -3,7 +3,29 @@ import CoreLocation
 
 struct QiblaView: View {
     @StateObject private var heading = HeadingProvider()
+    @State private var aligned = false
     private let bearing = SampleData.qiblaBearing
+
+    // Alignment colours
+    private let green  = Color(hex: 0x4C8C6A)
+    private let yellow = Color(hex: 0xC79A2E)
+    private let red    = Color(hex: 0xB0473C)
+
+    /// Signed difference between the qibla bearing and current heading, in −180…180.
+    private var signedDiff: Double {
+        var d = (bearing - heading.degrees).truncatingRemainder(dividingBy: 360)
+        if d > 180 { d -= 360 }
+        if d < -180 { d += 360 }
+        return d
+    }
+    private var delta: Double { abs(signedDiff) }
+    private var isAligned: Bool { delta <= 5 }
+    private var alignColor: Color {
+        if delta <= 5 { return green }
+        if delta <= 25 { return yellow }
+        return red
+    }
+    private var turnHint: String { signedDiff > 0 ? "turn right" : "turn left" }
 
     var body: some View {
         ScrollView {
@@ -22,6 +44,15 @@ struct QiblaView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, Space.s6)
 
+                if heading.hasHeading {
+                    HStack(spacing: Space.s4) {
+                        legendDot(green, "Aligned")
+                        legendDot(yellow, "Close")
+                        legendDot(red, "Turn")
+                        Spacer()
+                    }
+                }
+
                 note
 
                 GhostButton(title: "Recalibrate compass") { heading.recalibrate() }
@@ -36,28 +67,44 @@ struct QiblaView: View {
             .padding(.bottom, Space.s8)
         }
         .background(Palette.bg)
+        .onChange(of: heading.degrees) { _, _ in
+            // Nudge once when we enter alignment.
+            if isAligned && !aligned { Haptics.success() }
+            aligned = isAligned
+        }
     }
 
     private var compass: some View {
         ZStack {
-            // Outer + inner ring
+            // Outer ring + inner ring (inner tinted by alignment)
             Circle().stroke(Palette.divider, lineWidth: 1).frame(width: 280, height: 280)
-            Circle().stroke(Palette.divider, lineWidth: 1).frame(width: 214, height: 214)
+            Circle().stroke(heading.hasHeading ? alignColor.opacity(0.9) : Palette.divider,
+                            lineWidth: heading.hasHeading ? 3 : 1)
+                .frame(width: 214, height: 214)
 
             // Rotating dial (N/E/S/W) — reflects real-world north
             dial.rotationEffect(.degrees(-heading.degrees))
 
             // Needle to qibla, relative to current heading
             needle
-                .rotationEffect(.degrees(bearing - heading.degrees))
+                .rotationEffect(.degrees(signedDiff))
 
-            // Centre readout
+            // Centre readout — the live difference, or the fixed bearing before a heading fix
             VStack(spacing: 2) {
-                Text("\(Int(bearing))°")
-                    .font(Font2.condensed(48))
-                    .foregroundStyle(Palette.text)
-                    .monospacedDigit()
-                CapsLabel(compassPoint(bearing), size: 10)
+                if heading.hasHeading {
+                    Text(isAligned ? "0°" : "\(Int(delta))°")
+                        .font(Font2.condensed(48))
+                        .foregroundStyle(alignColor)
+                        .monospacedDigit()
+                    CapsLabel(isAligned ? "Facing qibla" : turnHint,
+                              color: alignColor, size: 10)
+                } else {
+                    Text("\(Int(bearing))°")
+                        .font(Font2.condensed(48))
+                        .foregroundStyle(Palette.text)
+                        .monospacedDigit()
+                    CapsLabel(compassPoint(bearing), size: 10)
+                }
             }
         }
         .frame(width: 280, height: 280)
@@ -77,18 +124,26 @@ struct QiblaView: View {
     }
 
     private var needle: some View {
-        VStack(spacing: 0) {
+        let color = heading.hasHeading ? alignColor : Palette.accent
+        return VStack(spacing: 0) {
             // Diamond marker at the tip
             Rectangle()
-                .fill(Palette.accent)
+                .fill(color)
                 .frame(width: 10, height: 10)
                 .rotationEffect(.degrees(45))
             Rectangle()
-                .fill(Palette.accent)
-                .frame(width: 1, height: 96)
+                .fill(color)
+                .frame(width: isAligned && heading.hasHeading ? 2 : 1, height: 96)
             Spacer().frame(height: 96 + 10)
         }
         .frame(height: 280)
+    }
+
+    private func legendDot(_ color: Color, _ label: String) -> some View {
+        HStack(spacing: 5) {
+            Rectangle().fill(color).frame(width: 10, height: 10)
+            Text(label).font(Font2.body(12)).foregroundStyle(Palette.mutedInk)
+        }
     }
 
     private func compassPoint(_ deg: Double) -> String {
@@ -120,10 +175,15 @@ final class HeadingProvider: NSObject, ObservableObject, CLLocationManagerDelega
     private let manager = CLLocationManager()
     @Published var degrees: Double = 0
     @Published var needsCalibration = false
+    @Published var hasHeading = false   // false on devices without a magnetometer (e.g. Simulator)
 
     override init() {
         super.init()
         manager.delegate = self
+        // Verification hook: seed a heading on the Simulator (no magnetometer). Launch env only.
+        if let v = ProcessInfo.processInfo.environment["WAQT_QIBLA_HEADING"], let d = Double(v) {
+            degrees = d; hasHeading = true; return
+        }
         if CLLocationManager.headingAvailable() {
             manager.headingFilter = 1
             manager.startUpdatingHeading()
@@ -139,6 +199,7 @@ final class HeadingProvider: NSObject, ObservableObject, CLLocationManagerDelega
         let h = newHeading.trueHeading >= 0 ? newHeading.trueHeading : newHeading.magneticHeading
         DispatchQueue.main.async {
             self.degrees = h
+            self.hasHeading = true
             self.needsCalibration = newHeading.headingAccuracy < 0 || newHeading.headingAccuracy > 20
         }
     }

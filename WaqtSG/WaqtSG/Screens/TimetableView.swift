@@ -91,6 +91,9 @@ struct TimetableView: View {
 
             if expanded {
                 VStack(spacing: Space.s3) {
+                    if let fardhu = SampleData.fardhuNiat[row] {
+                        fardhuBlock(fardhu)
+                    }
                     ForEach(SampleData.sunnah[row] ?? []) { s in
                         sunnahBlock(s)
                     }
@@ -103,6 +106,31 @@ struct TimetableView: View {
         }
         .padding(.horizontal, Space.s4)
         .contentShape(Rectangle())
+    }
+
+    private func fardhuBlock(_ f: Niat) -> some View {
+        HStack(alignment: .top, spacing: Space.s3) {
+            Rectangle().fill(Palette.accent900).frame(width: 2)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(f.title.uppercased())
+                    .font(Font2.medium(11))
+                    .tracking(1)
+                    .foregroundStyle(Palette.paperInk)
+                    .padding(.vertical, 3).padding(.horizontal, 8)
+                    .background(Palette.accent900)
+                Text("“\(f.transliteration)”")
+                    .font(Font2.body(13))
+                    .italic()
+                    .foregroundStyle(Palette.text)
+                    .lineSpacing(2)
+                Text(f.meaning)
+                    .font(Font2.body(12.5))
+                    .foregroundStyle(Palette.mutedInk)
+                    .lineSpacing(2)
+            }
+        }
+        .padding(.vertical, Space.s2)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func qunutBlock(_ q: Niat) -> some View {
