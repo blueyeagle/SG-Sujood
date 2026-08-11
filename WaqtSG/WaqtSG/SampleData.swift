@@ -23,41 +23,41 @@ enum SampleData {
     static let sunnah: [WaktuRow: [Sunnah]] = [
         .subuh: [
             Sunnah(position: "Before", rakaat: "2", rank: "Muakkad",
-                   niat: "Usalli sunnatas Subhi rak'ataini qabliyyatan lillahi ta'ala.",
+                   niat: "Usolli sunnatas Subhi rak'ataini qabliyyatan lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Subuh, two rakaat, before, for Allah Ta'ala.")
         ],
         .syuruk: [
             Sunnah(position: "Dhuha, after", rakaat: "2–8", rank: "—",
-                   niat: "Usalli sunnatad Dhuha rak'ataini lillahi ta'ala.",
+                   niat: "Usolli sunnatad Dhuha rak'ataini lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Dhuha, two rakaat, for Allah Ta'ala.")
         ],
         .zohor: [
             Sunnah(position: "Before", rakaat: "2 or 4", rank: "Muakkad",
-                   niat: "Usalli sunnataz Zuhri rak'ataini qabliyyatan lillahi ta'ala.",
+                   niat: "Usolli sunnataz Zuhri rak'ataini qabliyyatan lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Zohor, two rakaat, before, for Allah Ta'ala."),
             Sunnah(position: "After", rakaat: "2", rank: "Muakkad",
-                   niat: "Usalli sunnataz Zuhri rak'ataini ba'diyyatan lillahi ta'ala.",
+                   niat: "Usolli sunnataz Zuhri rak'ataini ba'diyyatan lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Zohor, two rakaat, after, for Allah Ta'ala.")
         ],
         .asar: [
             Sunnah(position: "Before", rakaat: "2 or 4", rank: "Ghair muakkad",
-                   niat: "Usalli sunnatal 'Asri rak'ataini qabliyyatan lillahi ta'ala.",
+                   niat: "Usolli sunnatal 'Asri rak'ataini qabliyyatan lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Asar, two rakaat, before, for Allah Ta'ala.")
         ],
         .maghrib: [
             Sunnah(position: "Before", rakaat: "2", rank: "Ghair muakkad",
-                   niat: "Usalli sunnatal Maghribi rak'ataini qabliyyatan lillahi ta'ala.",
+                   niat: "Usolli sunnatal Maghribi rak'ataini qabliyyatan lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Maghrib, two rakaat, before, for Allah Ta'ala."),
             Sunnah(position: "After", rakaat: "2", rank: "Muakkad",
-                   niat: "Usalli sunnatal Maghribi rak'ataini ba'diyyatan lillahi ta'ala.",
+                   niat: "Usolli sunnatal Maghribi rak'ataini ba'diyyatan lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Maghrib, two rakaat, after, for Allah Ta'ala.")
         ],
         .isyak: [
             Sunnah(position: "Before", rakaat: "2", rank: "Ghair muakkad",
-                   niat: "Usalli sunnatal 'Isyaa'i rak'ataini qabliyyatan lillahi ta'ala.",
+                   niat: "Usolli sunnatal 'Isyaa'i rak'ataini qabliyyatan lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Isyak, two rakaat, before, for Allah Ta'ala."),
             Sunnah(position: "After", rakaat: "2", rank: "Muakkad",
-                   niat: "Usalli sunnatal 'Isyaa'i rak'ataini ba'diyyatan lillahi ta'ala.",
+                   niat: "Usolli sunnatal 'Isyaa'i rak'ataini ba'diyyatan lillahi ta'ala.",
                    meaning: "I intend to pray the sunnah of Isyak, two rakaat, after, for Allah Ta'ala.")
         ],
     ]
@@ -90,19 +90,19 @@ enum SampleData {
     // For congregation add "ma'muman" (as makmum) or "imaman" (as imam) before "lillahi ta'ala".
     static let fardhuNiat: [WaktuRow: Niat] = [
         .subuh: Niat(title: "Fardhu · 2 rakaat",
-            transliteration: "Usalli fardas Subhi rak'ataini adaa'an lillahi ta'ala.",
+            transliteration: "Usolli fardas Subhi rak'ataini adaa'an lillahi ta'ala.",
             meaning: "I intend to pray the fardhu of Subuh, two rakaat, on time, for Allah Ta'ala."),
         .zohor: Niat(title: "Fardhu · 4 rakaat",
-            transliteration: "Usalli fardaz Zuhri arba'a raka'atin adaa'an lillahi ta'ala.",
+            transliteration: "Usolli fardaz Zuhri arba'a raka'atin adaa'an lillahi ta'ala.",
             meaning: "I intend to pray the fardhu of Zohor, four rakaat, on time, for Allah Ta'ala."),
         .asar: Niat(title: "Fardhu · 4 rakaat",
-            transliteration: "Usalli fardal 'Asri arba'a raka'atin adaa'an lillahi ta'ala.",
+            transliteration: "Usolli fardal 'Asri arba'a raka'atin adaa'an lillahi ta'ala.",
             meaning: "I intend to pray the fardhu of Asar, four rakaat, on time, for Allah Ta'ala."),
         .maghrib: Niat(title: "Fardhu · 3 rakaat",
-            transliteration: "Usalli fardal Maghribi thalatha raka'atin adaa'an lillahi ta'ala.",
+            transliteration: "Usolli fardal Maghribi thalatha raka'atin adaa'an lillahi ta'ala.",
             meaning: "I intend to pray the fardhu of Maghrib, three rakaat, on time, for Allah Ta'ala."),
         .isyak: Niat(title: "Fardhu · 4 rakaat",
-            transliteration: "Usalli fardal 'Isyaa'i arba'a raka'atin adaa'an lillahi ta'ala.",
+            transliteration: "Usolli fardal 'Isyaa'i arba'a raka'atin adaa'an lillahi ta'ala.",
             meaning: "I intend to pray the fardhu of Isyak, four rakaat, on time, for Allah Ta'ala."),
     ]
 
