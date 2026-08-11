@@ -22,8 +22,9 @@ created = os.environ.get("ISSUE_CREATED", "")
 
 
 def field(label):
-    # match "Label: value" case-insensitively, tolerant of markdown/whitespace
-    pattern = re.compile(rf"^\s*{re.escape(label)}\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
+    # match "Label: value" on a single line. Use [ \t] (not \s) around the colon so an empty
+    # value can't let the match spill onto the next line and capture a different field.
+    pattern = re.compile(rf"^[ \t]*{re.escape(label)}[ \t]*:[ \t]*(.*)$", re.IGNORECASE | re.MULTILINE)
     m = pattern.search(body)
     return m.group(1).strip() if m else ""
 
