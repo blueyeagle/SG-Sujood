@@ -6,8 +6,8 @@ import Foundation
 // falls back to opening a prefilled GitHub issue in the browser.
 enum SubmissionService {
 
-    /// >>> Set to your deployed Worker URL, e.g. "https://waqtsg-submit.<you>.workers.dev/submit" <<<
-    static let endpoint = "https://waqtsg-submit.YOURNAME.workers.dev/submit"
+    /// Deployed Cloudflare Worker (see backend/). Change if you rename the Worker.
+    static let endpoint = "https://waqtsg-submit.xphyton.workers.dev/submit"
 
     /// Optional — must match the Worker's APP_KEY if you set one.
     static let appKey = ""
