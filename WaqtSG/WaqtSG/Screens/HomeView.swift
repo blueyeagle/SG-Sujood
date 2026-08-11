@@ -187,8 +187,8 @@ struct HomeView: View {
     private func dotColor(_ status: PrayerStatus) -> Color {
         switch status {
         case .pending: return Palette.divider
-        case .done:    return Palette.accent
-        case .missed:  return Palette.accent900
+        case .done:    return Palette.success
+        case .missed:  return Palette.missed
         }
     }
 
@@ -207,12 +207,16 @@ struct HomeView: View {
     private func buttonFill(_ status: PrayerStatus) -> Color {
         switch status {
         case .pending: return .clear
-        case .done:    return Palette.accent
-        case .missed:  return Palette.accent900
+        case .done:    return Palette.success
+        case .missed:  return Palette.missed
         }
     }
     private func buttonInk(_ status: PrayerStatus) -> Color {
-        status == .pending ? Palette.mutedInk : Palette.paperInk
+        switch status {
+        case .pending: return Palette.mutedInk
+        case .done:    return Palette.accent900   // dark navy on green
+        case .missed:  return Palette.paperInk    // off-white on rose
+        }
     }
 
     // MARK: - Qadha owing row

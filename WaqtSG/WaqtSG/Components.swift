@@ -11,7 +11,7 @@ struct PrimaryButton: View {
             Text(title)
                 .font(Font2.condensed(17))
                 .tracking(0.5)
-                .foregroundStyle(Palette.paperInk)
+                .foregroundStyle(Palette.accent900)   // dark navy on gold
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 15)
                 .background(Palette.accent)
@@ -115,7 +115,7 @@ struct FilterButton: View {
             Text(title.uppercased())
                 .font(Font2.medium(11))
                 .tracking(1.2)
-                .foregroundStyle(selected ? Palette.paperInk : (onDark ? Palette.paperInkMuted : Palette.mutedInk))
+                .foregroundStyle(selected ? Palette.accent900 : (onDark ? Palette.paperInkMuted : Palette.mutedInk))
                 .padding(.vertical, 9)
                 .padding(.horizontal, 14)
                 .background(selected ? Palette.accent : Color.clear)

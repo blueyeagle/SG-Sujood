@@ -41,7 +41,7 @@ struct DzikirView: View {
             Text("\(phrase.name.uppercased()) \(phrase.target)")
                 .font(Font2.medium(11))
                 .tracking(0.8)
-                .foregroundStyle(selected ? Palette.paperInk : Palette.paperInk.opacity(0.7))
+                .foregroundStyle(selected ? Palette.accent900 : Palette.paperInk.opacity(0.7))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .background(selected ? Palette.accent : Color.clear)

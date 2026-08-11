@@ -3,21 +3,26 @@ import SwiftUI
 // MARK: - Design tokens (Industry design system — steel-blue wireframe on a light technical ground)
 
 enum Palette {
-    static let bg        = Color(hex: 0xF2F2F3) // Page ground
-    static let surface   = Color(hex: 0xE9E9EA) // Raised card fill
-    static let text      = Color(hex: 0x1D1F20) // Body ink
-    static let accent    = Color(hex: 0x5980A6) // Steel accent — active states, primary fill, markers
-    static let accent400 = Color(hex: 0x94BCE3) // Accent on dark plates
-    static let accent700 = Color(hex: 0x416180) // Accent text at paragraph size
-    static let accent900 = Color(hex: 0x1D2D3D) // The dark "field" — hero plate, Ramadan, Dzikir, Zakat header
+    // Warm, culturally-grounded palette: midnight navy field, warm off-white ground,
+    // gold interactive accent, soft green for completed, muted rose for missed.
+    static let bg        = Color(hex: 0xF5F3EF) // Warm off-white page ground
+    static let surface   = Color(hex: 0xECE7DF) // Warm raised card fill
+    static let text      = Color(hex: 0x1E1C1A) // Warm body ink
+    static let accent    = Color(hex: 0xC9A84C) // Gold — active states, primary fill, markers
+    static let accent400 = Color(hex: 0xE0C877) // Light gold on dark plates
+    static let accent700 = Color(hex: 0x7E611F) // Deep bronze — accent text at paragraph size
+    static let accent900 = Color(hex: 0x1A1A2E) // Midnight navy — hero plate, Ramadan, Dzikir, Zakat header
 
-    static let divider   = Color(hex: 0x1D1F20).opacity(0.16)
-    static let mutedInk  = Color(hex: 0x1D1F20).opacity(0.55)
+    static let success   = Color(hex: 0x2A9D8F) // Soft green — done / completed
+    static let missed    = Color(hex: 0xC4616C) // Muted rose — missed
+
+    static let divider   = Color(hex: 0x1E1C1A).opacity(0.14)
+    static let mutedInk  = Color(hex: 0x1E1C1A).opacity(0.55)
 
     // On the dark plate
-    static let paperInk        = Color(hex: 0xF2F2F3)
-    static let paperInkMuted   = Color(hex: 0xF2F2F3).opacity(0.60)
-    static let dividerOnDark   = Color(hex: 0x94BCE3).opacity(0.38)
+    static let paperInk        = Color(hex: 0xF5F3EF)
+    static let paperInkMuted   = Color(hex: 0xF5F3EF).opacity(0.62)
+    static let dividerOnDark   = Color(hex: 0xF5F3EF).opacity(0.20)
 }
 
 // MARK: - Spacing scale  3.4 / 6.8 / 10.2 / 13.6 / 20.4 / 27.2

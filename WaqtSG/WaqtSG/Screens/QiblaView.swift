@@ -7,9 +7,9 @@ struct QiblaView: View {
     private let bearing = SampleData.qiblaBearing
 
     // Alignment colours
-    private let green  = Color(hex: 0x4C8C6A)
+    private let green  = Palette.success          // soft green, matches "done"
     private let yellow = Color(hex: 0xC79A2E)
-    private let red    = Color(hex: 0xB0473C)
+    private let red    = Palette.missed            // muted rose
 
     /// Signed difference between the qibla bearing and current heading, in −180…180.
     private var signedDiff: Double {

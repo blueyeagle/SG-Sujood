@@ -101,8 +101,8 @@ struct QadhaView: View {
                 }
             }
             HStack(spacing: Space.s6) {
-                legend(fill: Palette.accent.opacity(0.18), text: "Complete", ink: Palette.text)
-                legend(fill: Palette.accent900, text: "One or more missed", ink: Palette.text)
+                legend(fill: Palette.success.opacity(0.20), text: "Complete", ink: Palette.text)
+                legend(fill: Palette.missed, text: "One or more missed", ink: Palette.text)
             }
             .padding(.top, 4)
         }
@@ -111,7 +111,7 @@ struct QadhaView: View {
     private func dayCell(_ day: Int) -> some View {
         let isFuture = day > today
         let isMissed = missedDays.contains(day)
-        let fill: Color = isFuture ? .clear : (isMissed ? Palette.accent900 : Palette.accent.opacity(0.18))
+        let fill: Color = isFuture ? .clear : (isMissed ? Palette.missed : Palette.success.opacity(0.20))
         let ink: Color = isMissed ? Palette.paperInk : (isFuture ? Palette.mutedInk.opacity(0.5) : Palette.text)
         return Text("\(day)")
             .font(Font2.body(12))
@@ -159,7 +159,7 @@ struct QadhaView: View {
                     Text("QADHA DONE")
                         .font(Font2.medium(10.5))
                         .tracking(1)
-                        .foregroundStyle(disabled ? Palette.mutedInk : Palette.paperInk)
+                        .foregroundStyle(disabled ? Palette.mutedInk : Palette.accent900)
                         .frame(height: 30)
                         .padding(.horizontal, 12)
                         .background(disabled ? Color.clear : Palette.accent)
