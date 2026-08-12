@@ -42,7 +42,8 @@ struct QiblaView: View {
 
                 compass
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, Space.s6)
+                    .padding(.vertical, Space.s8)
+                    .background(Palette.accent900)
 
                 if heading.hasHeading {
                     HStack(spacing: Space.s4) {
@@ -74,69 +75,94 @@ struct QiblaView: View {
         }
     }
 
+    // The active colour: alignment state when we have a heading, else gold.
+    private var c: Color { heading.hasHeading ? alignColor : Palette.accent }
+    private let D: CGFloat = 300
+
     private var compass: some View {
         ZStack {
-            // Outer ring + inner ring (inner tinted by alignment)
-            Circle().stroke(Palette.divider, lineWidth: 1).frame(width: 280, height: 280)
-            Circle().stroke(heading.hasHeading ? alignColor.opacity(0.9) : Palette.divider,
-                            lineWidth: heading.hasHeading ? 3 : 1)
-                .frame(width: 214, height: 214)
+            // Diamond lattice (Islamic tessellation), clipped to a circle
+            latticeCanvas
+                .frame(width: D * 0.80, height: D * 0.80)
+                .clipShape(Circle())
+            Circle().stroke(c.opacity(0.28), lineWidth: 1).frame(width: D * 0.80, height: D * 0.80)
 
-            // Rotating dial (N/E/S/W) — reflects real-world north
+            // Octagonal frame
+            Octagon().stroke(c.opacity(0.9), lineWidth: 1.5).frame(width: D, height: D)
+
+            // Rotating N/E/S/W dial — reflects real-world north
             dial.rotationEffect(.degrees(-heading.degrees))
 
-            // Needle to qibla, relative to current heading
-            needle
-                .rotationEffect(.degrees(signedDiff))
+            // Needle to the Kaaba, relative to current heading
+            needleView.rotationEffect(.degrees(signedDiff))
 
-            // Centre readout — the live difference, or the fixed bearing before a heading fix
+            // Centre readout
             VStack(spacing: 2) {
                 if heading.hasHeading {
                     Text(isAligned ? "0°" : "\(Int(delta))°")
                         .font(Font2.condensed(48))
                         .foregroundStyle(alignColor)
                         .monospacedDigit()
-                    CapsLabel(isAligned ? "Facing qibla" : turnHint,
-                              color: alignColor, size: 10)
+                    CapsLabel(isAligned ? "Facing qibla" : turnHint, color: alignColor, size: 10)
                 } else {
                     Text("\(Int(bearing))°")
                         .font(Font2.condensed(48))
-                        .foregroundStyle(Palette.text)
+                        .foregroundStyle(Palette.paperInk)
                         .monospacedDigit()
-                    CapsLabel(compassPoint(bearing), size: 10)
+                    CapsLabel(compassPoint(bearing), color: Palette.accent400, size: 10)
                 }
             }
         }
-        .frame(width: 280, height: 280)
+        .frame(width: D, height: D)
+    }
+
+    private var latticeCanvas: some View {
+        Canvas { ctx, size in
+            let step = size.width / 8
+            var path = Path()
+            var k = -size.height
+            while k < size.width {
+                path.move(to: CGPoint(x: k, y: 0)); path.addLine(to: CGPoint(x: k + size.height, y: size.height))
+                path.move(to: CGPoint(x: k, y: size.height)); path.addLine(to: CGPoint(x: k + size.height, y: 0))
+                k += step
+            }
+            ctx.stroke(path, with: .color(c.opacity(0.16)), lineWidth: 0.8)
+        }
     }
 
     private var dial: some View {
-        ZStack {
+        let r = D * 0.5 - 4
+        return ZStack {
             ForEach(Array(["N", "E", "S", "W"].enumerated()), id: \.offset) { i, mark in
+                let ang = Double(i) * .pi / 2   // N,E,S,W clockwise from top
                 Text(mark)
                     .font(Font2.medium(13))
-                    .foregroundStyle(mark == "N" ? Palette.accent700 : Palette.mutedInk)
-                    .offset(y: -122)
-                    .rotationEffect(.degrees(Double(i) * 90))
+                    .foregroundStyle(mark == "N" ? c : Palette.paperInkMuted)
+                    .rotationEffect(.degrees(heading.degrees))   // counter the dial's rotation → stays upright
+                    .offset(x: r * sin(ang), y: -r * cos(ang))
             }
         }
-        .frame(width: 280, height: 280)
+        .frame(width: D, height: D)
     }
 
-    private var needle: some View {
-        let color = heading.hasHeading ? alignColor : Palette.accent
-        return VStack(spacing: 0) {
-            // Diamond marker at the tip
+    private var needleView: some View {
+        let len = D * 0.40
+        return ZStack {
             Rectangle()
-                .fill(color)
-                .frame(width: 10, height: 10)
-                .rotationEffect(.degrees(45))
-            Rectangle()
-                .fill(color)
-                .frame(width: isAligned && heading.hasHeading ? 2 : 1, height: 96)
-            Spacer().frame(height: 96 + 10)
+                .fill(c)
+                .frame(width: isAligned && heading.hasHeading ? 2.5 : 1.5, height: len)
+                .offset(y: -len / 2)
+            kaabaMarker.offset(y: -len)
         }
-        .frame(height: 280)
+        .frame(width: D, height: D)
+    }
+
+    // Small Kaaba glyph at the needle tip (cube + kiswah band).
+    private var kaabaMarker: some View {
+        ZStack {
+            Rectangle().fill(c).frame(width: 18, height: 16)
+            Rectangle().fill(Palette.accent900).frame(width: 18, height: 2.5).offset(y: -3)
+        }
     }
 
     private func legendDot(_ color: Color, _ label: String) -> some View {
@@ -168,6 +194,21 @@ struct QiblaView: View {
             .padding(Space.s4)
             .frame(maxWidth: .infinity, alignment: .leading)
             .blueprint()
+    }
+}
+
+// Regular octagon with a vertex at the top (N / E / S / W at the cardinal vertices).
+struct Octagon: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        let cx = rect.midX, cy = rect.midY, r = min(rect.width, rect.height) / 2
+        for i in 0..<8 {
+            let a = Double(i) * .pi / 4 - .pi / 2   // start at the top
+            let pt = CGPoint(x: cx + r * cos(a), y: cy + r * sin(a))
+            if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+        }
+        p.closeSubpath()
+        return p
     }
 }
 
