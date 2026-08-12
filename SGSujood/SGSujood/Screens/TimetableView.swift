@@ -43,11 +43,40 @@ struct TimetableView: View {
                 Text("Jumu'ah replaces Zohor on Friday — attend the khutbah at your nearest masjid.")
                     .font(Font2.body(12.5))
                     .foregroundStyle(Palette.mutedInk)
+
+                ramadanLink
             }
             .padding(.horizontal, Space.gutter)
             .padding(.bottom, Space.s8)
         }
         .background(Palette.bg)
+    }
+
+    private var ramadanLink: some View {
+        let r = state.ramadan
+        let subtitle = r.isRamadan
+            ? "Day \(r.dayOfRamadan) · imsak, iftar & terawih"
+            : "\(r.daysToNext) days to Ramadan \(r.hijriYear)"
+        return NavigationLink { RamadanView() } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Ramadan mode")
+                        .font(Font2.condensed(19))
+                        .foregroundStyle(Palette.text)
+                    Text(subtitle)
+                        .font(Font2.body(12.5))
+                        .foregroundStyle(Palette.mutedInk)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(Palette.accent700)
+            }
+            .padding(Space.s4)
+            .blueprint()
+        }
+        .buttonStyle(.plain)
+        .padding(.top, Space.s2)
     }
 
     private var sourceNote: some View {
