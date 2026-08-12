@@ -1,0 +1,6 @@
+{
+  "_note": "Terawih venues — regenerated from the terawih workbook nearer Ramadan (see .github/scripts/build_terawih.py). No rakaat/start-time. While 'venues' is empty, the app lists the nearest mosques from spaces.json instead.",
+  "source": "SG Sujood terawih workbook",
+  "updated": "",
+  "venues": []
+}

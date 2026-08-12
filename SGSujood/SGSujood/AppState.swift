@@ -363,10 +363,12 @@ final class AppState: ObservableObject {
             cal.date(from: DateComponents(year: year, month: month, day: 1)) ?? now
         }
 
-        let isRamadan = (hm == 9)
+        var isRamadan = (hm == 9)
         let startYear: Int = (hm <= 9) ? hy : hy + 1   // upcoming (or current) Ramadan
         let start = firstOf(month: 9, year: startYear)
         let end = firstOf(month: 10, year: startYear)  // 1 Syawal
+        // Debug: preview Ramadan mode out of season (launch env only, never shipping UI).
+        if ProcessInfo.processInfo.environment["SGSUJOOD_FORCE_RAMADAN"] != nil { isRamadan = true }
         let daysToNext = isRamadan ? 0 : max(0, cal.dateComponents([.day], from: now, to: start).day ?? 0)
 
         return RamadanInfo(isRamadan: isRamadan, hijriYear: startYear,

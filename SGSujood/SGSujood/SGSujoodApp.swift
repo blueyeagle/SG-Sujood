@@ -7,6 +7,7 @@ struct SGSujoodApp: App {
     @StateObject private var spacesStore = SpacesStore()
     @StateObject private var location = LocationProvider()
     @StateObject private var routes = RouteService()
+    @StateObject private var terawih = TerawihStore()
 
     init() { FontRegistrar.register() }
 
@@ -26,12 +27,14 @@ struct SGSujoodApp: App {
             .environmentObject(spacesStore)
             .environmentObject(location)
             .environmentObject(routes)
+            .environmentObject(terawih)
             .tint(Palette.accent)
             .preferredColorScheme(.light)   // The design is authored on a light technical ground.
             .task {
                 location.start()
                 await nisab.refresh()        // pull latest nisab from remote config
                 await spacesStore.refresh()  // pull latest prayer-space directory
+                await terawih.refresh()      // pull latest terawih venues
             }
         }
     }

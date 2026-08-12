@@ -2,8 +2,31 @@ import SwiftUI
 
 struct RamadanView: View {
     @EnvironmentObject var state: AppState
+    @EnvironmentObject var terawihStore: TerawihStore
+    @EnvironmentObject var spaces: SpacesStore
+    @EnvironmentObject var location: LocationProvider
 
     private var info: AppState.RamadanInfo { state.ramadan }
+
+    // Curated terawih venues (from terawih.json), nearest first. Until that list is populated,
+    // fall back to the nearest mosques in the directory.
+    private struct Venue { let name: String; let subtitle: String?; let metres: Double? }
+    private var usingCurated: Bool { !terawihStore.venues.isEmpty }
+    private var terawihVenues: [Venue] {
+        let origin = location.current
+        if usingCurated {
+            return terawihStore.sorted(from: origin).map {
+                Venue(name: $0.name, subtitle: $0.address ?? $0.note,
+                      metres: $0.location?.distance(from: origin))
+            }
+        }
+        return spaces.spaces
+            .filter { $0.category == "masjid" }
+            .compactMap { s in s.location.map { (s, $0.distance(from: origin)) } }
+            .sorted { $0.1 < $1.1 }
+            .prefix(6)
+            .map { Venue(name: $0.0.name, subtitle: $0.0.address, metres: $0.1) }
+    }
 
     private var iftarCountdown: String {
         let maghrib = state.time(for: WaktuRow.maghrib)
@@ -96,27 +119,43 @@ struct RamadanView: View {
         .overlay(Rectangle().stroke(Palette.dividerOnDark, lineWidth: 1))
     }
 
+    @ViewBuilder
     private var terawih: some View {
+        let venues = terawihVenues
         VStack(alignment: .leading, spacing: Space.s3) {
             CapsLabel("Terawih nearby", color: Palette.accent400)
-            VStack(spacing: 0) {
-                ForEach(Array(SampleData.terawih.enumerated()), id: \.element.id) { idx, t in
-                    if idx > 0 { Hairline(onDark: true) }
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(t.mosque).font(Font2.condensed(19)).foregroundStyle(Palette.paperInk)
-                            Text(t.detail).font(Font2.body(12.5)).foregroundStyle(Palette.paperInkMuted)
+            if venues.isEmpty {
+                Text("No terawih venues nearby yet.")
+                    .font(Font2.body(13)).foregroundStyle(Palette.paperInkMuted)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(venues.enumerated()), id: \.offset) { idx, v in
+                        if idx > 0 { Hairline(onDark: true) }
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(v.name).font(Font2.condensed(19)).foregroundStyle(Palette.paperInk)
+                                if let sub = v.subtitle {
+                                    Text(sub).font(Font2.body(12.5)).foregroundStyle(Palette.paperInkMuted).lineLimit(1)
+                                }
+                            }
+                            Spacer()
+                            if let m = v.metres {
+                                HStack(spacing: 4) {
+                                    Text(m >= 2000 ? String(format: "%.1f", m/1000) : "\(Walk.minutes(m))")
+                                        .font(Font2.condensed(22)).foregroundStyle(Palette.paperInk).monospacedDigit()
+                                    CapsLabel(m >= 2000 ? "km" : "min", color: Palette.paperInkMuted, size: 9)
+                                }
+                            }
                         }
-                        Spacer()
-                        HStack(spacing: 4) {
-                            Text("\(t.walkMinutes)").font(Font2.condensed(22)).foregroundStyle(Palette.paperInk).monospacedDigit()
-                            CapsLabel("min", color: Palette.paperInkMuted, size: 9)
-                        }
+                        .padding(.vertical, 13)
                     }
-                    .padding(.vertical, 13)
+                }
+                .overlay(Rectangle().stroke(Palette.dividerOnDark, lineWidth: 1))
+                if !usingCurated {
+                    Text("Showing nearest mosques — the curated terawih list updates nearer Ramadan.")
+                        .font(Font2.body(11.5)).foregroundStyle(Palette.paperInkMuted)
                 }
             }
-            .overlay(Rectangle().stroke(Palette.dividerOnDark, lineWidth: 1))
         }
     }
 

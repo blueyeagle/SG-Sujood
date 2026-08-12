@@ -90,14 +90,7 @@ struct NiatGroup: Identifiable {
     }
 }
 
-// MARK: - Terawih (Ramadan)
-
-struct TerawihEntry: Identifiable {
-    let id = UUID()
-    let mosque: String
-    let detail: String   // "20 rakaat · 8.30 pm"
-    let walkMinutes: Int
-}
+// Terawih venues are modelled in TerawihStore (TerawihVenue), loaded from terawih.json.
 
 // MARK: - Dzikir
 

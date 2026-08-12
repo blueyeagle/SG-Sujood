@@ -146,11 +146,7 @@ enum SampleData {
     // Zakat nisab is real & remote-configurable — see NisabStore / nisab.json.
 
     // MARK: - Ramadan
-
-    static let terawih: [TerawihEntry] = [
-        TerawihEntry(mosque: "Masjid Al-Falah", detail: "20 rakaat · 8.30 pm", walkMinutes: 6),
-        TerawihEntry(mosque: "Masjid Sultan",   detail: "8 rakaat · 8.15 pm",  walkMinutes: 14),
-    ]
+    // Terawih venues are real & remote-configurable — see TerawihStore / terawih.json.
 
     // Ramadan intentions & du'a (Shafi'i, as commonly practised in Singapore).
     // Have wording reviewed by a religious authority before shipping; consider adding Arabic script.

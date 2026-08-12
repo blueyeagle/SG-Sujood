@@ -1,0 +1,47 @@
+name: Regenerate terawih venues
+
+# When the terawih workbook is added/updated, geocode it into terawih.json (which the app
+# fetches live). No secrets — uses the built-in GITHUB_TOKEN.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Terawih Venues.xlsx'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regenerate-terawih
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install openpyxl
+
+      - name: Build terawih.json from workbook
+        env:
+          BUILD_DATE: ${{ github.event.head_commit.timestamp }}
+        run: python .github/scripts/build_terawih.py "Terawih Venues.xlsx"
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add terawih.json
+          if git diff --cached --quiet; then
+            echo "No change to terawih.json."
+          else
+            git commit -m "Regenerate terawih.json from Terawih Venues workbook"
+            git push
+          fi
