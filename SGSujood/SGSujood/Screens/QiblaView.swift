@@ -4,6 +4,7 @@ import CoreLocation
 struct QiblaView: View {
     @StateObject private var heading = HeadingProvider()
     @State private var aligned = false
+    @State private var recalibrating = false
     private let bearing = SampleData.qiblaBearing
 
     // Alignment colours
@@ -56,9 +57,18 @@ struct QiblaView: View {
 
                 note
 
-                GhostButton(title: "Recalibrate compass") { heading.recalibrate() }
+                GhostButton(title: recalibrating ? "Recalibrating…" : "Recalibrate compass") {
+                    Haptics.light()
+                    heading.recalibrate()
+                    recalibrating = true
+                    Task { try? await Task.sleep(nanoseconds: 2_000_000_000); recalibrating = false }
+                }
 
-                if heading.needsCalibration {
+                if !heading.hasHeading {
+                    Text("Compass needs a device with a magnetometer — it won't move in the Simulator.")
+                        .font(Font2.body(12.5))
+                        .foregroundStyle(Palette.mutedInk)
+                } else if heading.needsCalibration {
                     Text("Compass accuracy is low — move away from metal and wave the phone in a figure-eight.")
                         .font(Font2.body(12.5))
                         .foregroundStyle(Palette.accent700)
