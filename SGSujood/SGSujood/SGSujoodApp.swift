@@ -32,6 +32,7 @@ struct SGSujoodApp: App {
             .preferredColorScheme(.light)   // The design is authored on a light technical ground.
             .task {
                 location.start()
+                state.rescheduleReminders()  // keep prayer-time notifications fresh
                 await nisab.refresh()        // pull latest nisab from remote config
                 await spacesStore.refresh()  // pull latest prayer-space directory
                 await terawih.refresh()      // pull latest terawih venues

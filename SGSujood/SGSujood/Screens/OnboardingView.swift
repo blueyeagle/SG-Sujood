@@ -38,6 +38,7 @@ struct OnboardingView: View {
                     VStack(spacing: Space.s3) {
                         PrimaryButton(title: "Allow and continue") {
                             permissions.request {
+                                state.rescheduleReminders()   // schedule prayer alerts once notifications are allowed
                                 withAnimation { state.onboarded = true }
                             }
                         }

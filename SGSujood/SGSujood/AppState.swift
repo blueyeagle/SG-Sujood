@@ -196,6 +196,17 @@ final class AppState: ObservableObject {
         return clockString(for: imsak)
     }
 
+    // MARK: - Prayer reminders
+
+    /// (Re)build local notifications from the current per-waktu toggles + lead time.
+    func rescheduleReminders() {
+        if reminderOn.values.contains(true) {
+            PrayerNotifications.reschedule(enabled: reminderOn, leadMinutes: leadMinutes)
+        } else {
+            PrayerNotifications.cancelAll()
+        }
+    }
+
     // MARK: - Next / previous waktu (prayers only, for the hero)
 
     private var prayerRowsOrder: [WaktuRow] { [.subuh, .zohor, .asar, .maghrib, .isyak] }

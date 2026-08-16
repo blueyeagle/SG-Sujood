@@ -53,4 +53,12 @@ enum PrayerData {
         let (h, m, pm) = SampleData.waktuClock[row]!   // fallback
         return ((h % 12) + (pm ? 12 : 0), m)
     }
+
+    /// The absolute Date for a waktu on a given calendar day.
+    static func date(for row: WaktuRow, on day: Date) -> Date {
+        let (h, m) = components(for: row, on: day)
+        var c = Calendar.current.dateComponents([.year, .month, .day], from: day)
+        c.hour = h; c.minute = m; c.second = 0
+        return Calendar.current.date(from: c) ?? day
+    }
 }

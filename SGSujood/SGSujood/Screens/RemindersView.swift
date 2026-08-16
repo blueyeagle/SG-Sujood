@@ -4,12 +4,12 @@ struct RemindersView: View {
     @EnvironmentObject var state: AppState
 
     private let rows: [(WaktuRow, String)] = [
-        (.subuh,   "Vibrate at waktu · nudge 15 min before"),
+        (.subuh,   "Silent alert at waktu, and a nudge before"),
         (.syuruk,  "End of the Subuh window"),
-        (.zohor,   "Vibrate at waktu · nudge 15 min before"),
-        (.asar,    "Vibrate at waktu · nudge 15 min before"),
-        (.maghrib, "Vibrate at waktu · nudge 15 min before"),
-        (.isyak,   "Vibrate at waktu · nudge 15 min before"),
+        (.zohor,   "Silent alert at waktu, and a nudge before"),
+        (.asar,    "Silent alert at waktu, and a nudge before"),
+        (.maghrib, "Silent alert at waktu, and a nudge before"),
+        (.isyak,   "Silent alert at waktu, and a nudge before"),
     ]
 
     var body: some View {
@@ -56,6 +56,8 @@ struct RemindersView: View {
         }
         .background(Palette.bg)
         .navigationBarBackButtonHidden(true)
+        .onChange(of: state.reminderOn) { _, _ in state.rescheduleReminders() }
+        .onChange(of: state.leadMinutes) { _, _ in state.rescheduleReminders() }
     }
 
     private func reminderRow(_ row: WaktuRow, subtitle: String) -> some View {
