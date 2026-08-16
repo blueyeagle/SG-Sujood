@@ -199,9 +199,10 @@ final class AppState: ObservableObject {
     // MARK: - Prayer reminders
 
     /// (Re)build local notifications from the current per-waktu toggles + lead time.
-    func rescheduleReminders() {
+    /// `nearest` (e.g. "ION Orchard · 3 min") is named in the pre-waktu nudge when available.
+    func rescheduleReminders(nearest: String? = nil) {
         if reminderOn.values.contains(true) {
-            PrayerNotifications.reschedule(enabled: reminderOn, leadMinutes: leadMinutes)
+            PrayerNotifications.reschedule(enabled: reminderOn, leadMinutes: leadMinutes, nearest: nearest)
         } else {
             PrayerNotifications.cancelAll()
         }

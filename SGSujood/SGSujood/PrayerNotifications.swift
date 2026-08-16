@@ -10,14 +10,15 @@ enum PrayerNotifications {
     private static let days = 6                      // 5 waktu × 2 (nudge + at) × 6 ≈ 60 < 64
 
     /// Request authorization (if needed) and (re)build the schedule from the current settings.
-    static func reschedule(enabled: [Prayer: Bool], leadMinutes: Int) {
+    /// `nearest` (e.g. "ION Orchard · 3 min") is named in the pre-waktu nudge when provided.
+    static func reschedule(enabled: [Prayer: Bool], leadMinutes: Int, nearest: String? = nil) {
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
             guard granted else { return }
             center.getPendingNotificationRequests { pending in
                 let stale = pending.map(\.identifier).filter { $0.hasPrefix(prefix) }
                 center.removePendingNotificationRequests(withIdentifiers: stale)
-                build(enabled: enabled, leadMinutes: leadMinutes, center: center)
+                build(enabled: enabled, leadMinutes: leadMinutes, nearest: nearest, center: center)
             }
         }
     }
@@ -31,10 +32,12 @@ enum PrayerNotifications {
         }
     }
 
-    private static func build(enabled: [Prayer: Bool], leadMinutes: Int, center: UNUserNotificationCenter) {
+    private static func build(enabled: [Prayer: Bool], leadMinutes: Int, nearest: String?,
+                              center: UNUserNotificationCenter) {
         let cal = Calendar.current
         let now = Date()
         let df = DateFormatter(); df.locale = Locale(identifier: "en_US_POSIX"); df.dateFormat = "yyyyMMdd"
+        let nearestSuffix = nearest.map { " Nearest space: \($0)." } ?? ""
 
         for offset in 0..<days {
             guard let day = cal.date(byAdding: .day, value: offset, to: now) else { continue }
@@ -51,7 +54,7 @@ enum PrayerNotifications {
                 if let pre = cal.date(byAdding: .minute, value: -leadMinutes, to: waktu) {
                     add(center, id: "\(prefix)\(prayer.rawValue)-\(key)-pre",
                         title: "\(prayer.rawValue) soon",
-                        body: "\(prayer.rawValue) is in \(leadMinutes) minutes.",
+                        body: "\(prayer.rawValue) is in \(leadMinutes) minutes.\(nearestSuffix)",
                         at: pre, now: now)
                 }
             }
