@@ -2,8 +2,6 @@ import SwiftUI
 
 struct RemindersView: View {
     @EnvironmentObject var state: AppState
-    @EnvironmentObject var spaces: SpacesStore
-    @EnvironmentObject var location: LocationProvider
 
     private let rows: [(WaktuRow, String)] = [
         (.subuh,   "Silent alert at waktu, and a nudge before"),
@@ -47,7 +45,7 @@ struct RemindersView: View {
                         }
                         Spacer()
                     }
-                    Text("The nudge names the nearest space, so you can decide whether to move now or pray where you are.")
+                    Text("A silent nudge this many minutes before each waktu, so you can wrap up and get ready to pray.")
                         .font(Font2.body(12.5))
                         .foregroundStyle(Palette.mutedInk)
                         .lineSpacing(2)
@@ -58,12 +56,8 @@ struct RemindersView: View {
         }
         .background(Palette.bg)
         .navigationBarBackButtonHidden(true)
-        .onChange(of: state.reminderOn) { _, _ in reschedule() }
-        .onChange(of: state.leadMinutes) { _, _ in reschedule() }
-    }
-
-    private func reschedule() {
-        state.rescheduleReminders(nearest: spaces.nearestHint(from: location.current))
+        .onChange(of: state.reminderOn) { _, _ in state.rescheduleReminders() }
+        .onChange(of: state.leadMinutes) { _, _ in state.rescheduleReminders() }
     }
 
     private func reminderRow(_ row: WaktuRow, subtitle: String) -> some View {

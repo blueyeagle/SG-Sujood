@@ -4,8 +4,6 @@ import UserNotifications
 
 struct OnboardingView: View {
     @EnvironmentObject var state: AppState
-    @EnvironmentObject var spaces: SpacesStore
-    @EnvironmentObject var location: LocationProvider
     @StateObject private var permissions = PermissionRequester()
 
     var body: some View {
@@ -40,8 +38,7 @@ struct OnboardingView: View {
                     VStack(spacing: Space.s3) {
                         PrimaryButton(title: "Allow and continue") {
                             permissions.request {
-                                // schedule prayer alerts once notifications are allowed
-                                state.rescheduleReminders(nearest: spaces.nearestHint(from: location.current))
+                                state.rescheduleReminders()   // schedule prayer alerts once notifications are allowed
                                 withAnimation { state.onboarded = true }
                             }
                         }

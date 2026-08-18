@@ -134,13 +134,6 @@ final class SpacesStore: ObservableObject {
         }
     }
 
-    /// "ION Orchard · 3 min" for the nearest space, or nil if none is locatable.
-    func nearestHint(from origin: CLLocation) -> String? {
-        guard let s = nearest(to: origin) else { return nil }
-        if let m = s.location?.distance(from: origin) { return "\(s.name) · \(Walk.minutes(m)) min" }
-        return s.name
-    }
-
     func nearest(to origin: CLLocation) -> SpaceRecord? {
         spaces.compactMap { s -> (SpaceRecord, CLLocationDistance)? in
             guard let l = s.location else { return nil }
