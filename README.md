@@ -9,6 +9,7 @@ Ramadan mode. Built from the design handoff in [`design_handoff_waqt_sg/`](desig
 | Path | What |
 | --- | --- |
 | [`SGSujood/`](SGSujood/) | The Xcode project. Open `SGSujood/SGSujood.xcodeproj` and ⌘R. See [`SGSujood/BUILD_NOTES.md`](SGSujood/BUILD_NOTES.md). |
+| [`TESTFLIGHT.md`](TESTFLIGHT.md) | How to release to TestFlight (CI setup + secrets). |
 | [`nisab.json`](nisab.json) | **Live nisab config** the app fetches (see below). |
 | [`spaces.json`](spaces.json) | **Live prayer-space directory** (165 spaces, geocoded) the app fetches. |
 | [`SG Prayer Spaces.xlsx`](SG%20Prayer%20Spaces.xlsx) | Source workbook for the directory. |
