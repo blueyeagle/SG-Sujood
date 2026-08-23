@@ -60,6 +60,24 @@ Lets CI sign and upload without your Apple ID / 2FA.
 
 ---
 
+## 3b. Upload from your Mac with the API key (no CI, no Transporter)
+
+Once you have the API key, you can upload a locally-built `.ipa` in one command:
+
+1. `cp scripts/asc.env.example scripts/asc.env` and fill in `ASC_KEY_ID`, `ASC_ISSUER_ID`,
+   and `ASC_KEY_P8` (path to your downloaded `AuthKey_XXXX.p8`). `scripts/asc.env` and
+   `*.p8` are gitignored — they never get committed.
+2. Run it against the App Store–signed build:
+   ```bash
+   scripts/upload-testflight.sh "../ipa build files/SGSujood-1.0-appstore.ipa"
+   ```
+   It validates, then uploads, then the build appears in TestFlight ("Processing").
+
+(To build that `.ipa`: Xcode **Product → Archive → Distribute App → App Store Connect →
+Export**, or the CI workflow below.)
+
+---
+
 ## 4. Release a build
 
 - **Manually:** GitHub → **Actions → TestFlight → Run workflow**.

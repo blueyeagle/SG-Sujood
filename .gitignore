@@ -12,3 +12,7 @@ DerivedData/
 
 # Redundant duplicate of design_handoff_waqt_sg/ (kept locally, not versioned)
 Islamic Prayer Locator Singapore.zip
+
+# App Store Connect API key config (local only)
+scripts/asc.env
+scripts/*.p8
