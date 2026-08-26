@@ -60,7 +60,21 @@ Lets CI sign and upload without your Apple ID / 2FA.
 
 ---
 
-## 3b. Upload from your Mac with the API key (no CI, no Transporter)
+## 3a. One command: bump → archive → export → upload
+
+With `scripts/asc.env` filled in (Key ID + Issuer ID + `.p8` path), a full release is one command:
+
+```bash
+scripts/release.sh          # build number = git commit count (always increasing)
+scripts/release.sh 57       # or force a specific build number
+```
+
+It archives (Release), exports an App Store `.ipa` into `../ipa build files/`, and uploads to
+TestFlight. The build number is auto-derived so each run is higher than the last — no manual
+edit. `MARKETING_VERSION` (the `1.0` version string) is read from the project; bump it there
+when you want a new version.
+
+## 3b. Upload an already-built .ipa with the API key (no CI, no Transporter)
 
 Once you have the API key, you can upload a locally-built `.ipa` in one command:
 
