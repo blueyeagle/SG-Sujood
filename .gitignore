@@ -16,3 +16,6 @@ Islamic Prayer Locator Singapore.zip
 # App Store Connect API key config (local only)
 scripts/asc.env
 scripts/*.p8
+
+# Wrangler local cache / state
+.wrangler/
