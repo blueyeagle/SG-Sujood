@@ -1,0 +1,44 @@
+name: Publish prayer times
+
+# When a per-year source file changes under prayer-times/, rebuild the combined prayer_times.json
+# feed (which the data Worker serves and the app fetches live). Add a new year by committing
+# prayer-times/<year>.json — the app then picks it up with no App Store release. No secrets.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'prayer-times/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-prayer-times
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build prayer_times.json from per-year sources
+        run: python .github/scripts/build_prayer_times.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add prayer_times.json
+          if git diff --cached --quiet; then
+            echo "No change to prayer_times.json."
+          else
+            git commit -m "Rebuild prayer_times.json from per-year sources"
+            git push
+          fi

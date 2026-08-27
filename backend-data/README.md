@@ -35,14 +35,22 @@ curl https://sgsujood-data.xphyton.workers.dev/nisab.json
 
 The core feature depends on this — the bundled data only covers 2026.
 
-1. Parse next year's MUIS timetable into day records (`{"d":"2027-01-01","subuh":"05:52",…}`).
-2. Append them to **`prayer_times.json`** in the repo root (keep all prior years in the file).
-3. Commit + push. Within ~10 minutes every installed app picks up 2027 automatically; offline
-   devices keep working from their last cached copy.
+1. Parse next year's MUIS timetable into day records
+   (`{"d":"2027-01-01","subuh":"05:52",…}`, all six waktu as `HH:mm`).
+2. Save them as **`prayer-times/2027.json`** (one file per year — never touch prior years).
+3. Commit + push. The **Publish prayer times** GitHub Action rebuilds the combined
+   `prayer_times.json` from every `prayer-times/*.json`, validates each record, and commits it.
+   Within ~10 minutes every installed app picks up 2027 automatically; offline devices keep
+   working from their last cached copy.
 
-No app update, no reinstall. (Optionally also drop `prayer_times_2027.json` into the app bundle
-and add `"2027"` to `PrayerData.bundledYears` so fresh installs have it offline before first
-fetch.)
+No app update, no reinstall. Rebuild locally the same way the Action does:
+
+```bash
+python3 .github/scripts/build_prayer_times.py
+```
+
+(Optionally also drop `prayer_times_2027.json` into the app bundle and add `"2027"` to
+`PrayerData.bundledYears` so fresh installs have it offline before their first fetch.)
 
 ## Notes
 
