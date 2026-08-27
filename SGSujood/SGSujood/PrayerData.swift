@@ -4,7 +4,7 @@ import Foundation
 // "Prayer timetable 2026" PDF into prayer_times_2026.json (365 days, 24-hour "HH:mm").
 // Times are identical island-wide. Refresh annually with the next year's MUIS timetable.
 
-struct DayTimes: Decodable {
+struct DayTimes: Codable {
     let d: String            // "yyyy-MM-dd"
     let subuh, syuruk, zohor, asar, maghrib, isyak: String  // "HH:mm" (24h)
 
@@ -21,14 +21,33 @@ struct DayTimes: Decodable {
 }
 
 enum PrayerData {
-    /// Keyed by "yyyy-MM-dd".
-    static let byDate: [String: DayTimes] = {
-        guard let url = Bundle.main.url(forResource: "prayer_times_2026", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let rows = try? JSONDecoder().decode([DayTimes].self, from: data)
-        else { return [:] }
-        return Dictionary(uniqueKeysWithValues: rows.map { ($0.d, $0) })
-    }()
+    /// Years shipped inside the app bundle as `prayer_times_<year>.json`. These are the offline
+    /// seed; newer years arrive at runtime via PrayerTimesStore (remote config) so the app keeps
+    /// working past 2026 without an App Store update.
+    static let bundledYears = ["2026"]
+
+    /// Keyed by "yyyy-MM-dd". Seeded from the bundled year(s) on first access, then extended at
+    /// runtime by `merge(_:)` when PrayerTimesStore pulls the hosted feed (cached + remote).
+    static var byDate: [String: DayTimes] = loadBundled()
+
+    /// Load every bundled year's timetable into one dictionary.
+    static func loadBundled() -> [String: DayTimes] {
+        var out: [String: DayTimes] = [:]
+        for year in bundledYears {
+            guard let url = Bundle.main.url(forResource: "prayer_times_\(year)", withExtension: "json"),
+                  let data = try? Data(contentsOf: url),
+                  let rows = try? JSONDecoder().decode([DayTimes].self, from: data)
+            else { continue }
+            for r in rows { out[r.d] = r }
+        }
+        return out
+    }
+
+    /// Merge additional days (from cache or the remote feed) over what's loaded. Later years and
+    /// corrections simply overwrite by date key. Call on the main actor.
+    static func merge(_ rows: [DayTimes]) {
+        for r in rows { byDate[r.d] = r }
+    }
 
     private static let keyFormatter: DateFormatter = {
         let f = DateFormatter()

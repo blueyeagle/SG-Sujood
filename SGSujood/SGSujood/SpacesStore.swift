@@ -72,8 +72,9 @@ struct SpacesPayload: Decodable {
 @MainActor
 final class SpacesStore: ObservableObject {
 
-    /// Hosted directory (GitHub raw). Update spaces.json in the repo to change the in-app list.
-    static let remoteURL = URL(string: "https://raw.githubusercontent.com/blueyeagle/SG-Sujood/main/spaces.json")
+    /// Hosted directory, served by the data Worker (see RemoteConfig). Update spaces.json in the
+    /// repo to change the in-app list without an App Store release.
+    static let remoteURL = RemoteConfig.url("spaces.json")
 
     enum Origin: String { case bundled, cached, remote }
 

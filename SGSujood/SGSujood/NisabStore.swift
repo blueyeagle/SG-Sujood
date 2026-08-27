@@ -36,10 +36,10 @@ struct NisabPayload: Codable {
 @MainActor
 final class NisabStore: ObservableObject {
 
-    /// Hosted config (GitHub raw). Update nisab.json in the blueyeagle/SG-Sujood repo to push
-    /// a new figure without an App Store release. Until the file exists, this 404s and the app
-    /// falls back to the bundled seed.
-    static let remoteURL = URL(string: "https://raw.githubusercontent.com/blueyeagle/SG-Sujood/main/nisab.json")
+    /// Hosted config, served by the data Worker (see RemoteConfig). Update nisab.json in the
+    /// blueyeagle/SG-Sujood repo to push a new figure without an App Store release. Until the
+    /// Worker/file is reachable, this fails and the app falls back to the cached/bundled seed.
+    static let remoteURL = RemoteConfig.url("nisab.json")
 
     enum Origin: String { case bundled, cached, remote }
 

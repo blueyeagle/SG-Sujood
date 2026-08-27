@@ -29,8 +29,9 @@ struct TerawihPayload: Decodable {
 @MainActor
 final class TerawihStore: ObservableObject {
 
-    /// Hosted config (GitHub raw). Regenerated from the terawih workbook.
-    static let remoteURL = URL(string: "https://raw.githubusercontent.com/blueyeagle/SG-Sujood/main/terawih.json")
+    /// Hosted config, served by the data Worker (see RemoteConfig). Regenerated from the terawih
+    /// workbook.
+    static let remoteURL = RemoteConfig.url("terawih.json")
 
     @Published private(set) var venues: [TerawihVenue] = []
     @Published private(set) var updated: String?

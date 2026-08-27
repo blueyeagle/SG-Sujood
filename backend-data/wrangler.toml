@@ -1,0 +1,7 @@
+name = "sgsujood-data"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# No secrets required — this Worker only proxies PUBLIC raw files from the repo.
+# If you later make the repo private, add a fine-grained read-only token as a secret
+# (npx wrangler secret put GITHUB_TOKEN) and send it as an Authorization header in worker.js.
