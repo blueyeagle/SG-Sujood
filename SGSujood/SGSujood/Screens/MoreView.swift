@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum MoreRoute: Hashable {
-    case qadha, dzikir, afterSolat, niatSolat, zakat, reminders, addSpace, ramadan, widgets, location
+    case qadha, dzikir, afterSolat, niatSolat, zakat, reminders, addSpace, ramadan, widgets, location, rakaat
 }
 
 struct MoreView: View {
@@ -12,6 +12,7 @@ struct MoreView: View {
         [
             (.qadha,     "Qadha record",         "\(state.qadhaTotal) owing this month"),
             (.dzikir,    "Dzikir counter",       "Tasbih with presets and rounds"),
+            (.rakaat,    "Rak'ah counter",       "Count sujud from your posture (beta)"),
             (.afterSolat,"Doa after solat",      "Dhikr and supplications after prayer"),
             (.niatSolat, "Niat solat",           "Jumaat, jenazah, qada, jamak & sunat"),
             (.zakat,     "Zakat",                "Nisab, haul and your holding"),
@@ -71,6 +72,7 @@ struct MoreView: View {
             case .ramadan:   RamadanView()
             case .widgets:   WidgetsSpecView()
             case .location:  LocationView()
+            case .rakaat:    RakaatCounterView()
             }
         }
     }

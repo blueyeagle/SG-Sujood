@@ -62,6 +62,7 @@ struct DebugScreen: View {
             case "aftersolat": AfterSolatView()
             case "niatsolat": NiatSolatView()
             case "ramadan":   RamadanView()
+            case "rakaat":    RakaatCounterView()
             case "reminders": RemindersView()
             case "addspace":  AddSpaceView()
             case "widgets":   WidgetsSpecView()
