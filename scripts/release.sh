@@ -9,6 +9,15 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$HERE/.." && pwd)"
+
+# App Store Connect API key — used to sign/export non-interactively (no logged-in Xcode account
+# needed) and to upload. Comes from scripts/asc.env (gitignored) or the environment.
+[ -f "$HERE/asc.env" ] && source "$HERE/asc.env"
+AUTH=()
+if [ -n "${ASC_KEY_ID:-}" ] && [ -n "${ASC_ISSUER_ID:-}" ]; then
+  KEYP8="${ASC_KEY_P8:-$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8}"
+  AUTH=(-authenticationKeyPath "$KEYP8" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+fi
 PROJ="$REPO/SGSujood/SGSujood.xcodeproj"
 SCHEME="SGSujood"
 EXPORT_OPTS="$REPO/SGSujood/ExportOptions.plist"
@@ -33,14 +42,14 @@ echo "▶ [1/4] Archiving (Release)…"
 xcodebuild archive \
   -project "$PROJ" -scheme "$SCHEME" -configuration Release \
   -destination 'generic/platform=iOS' -archivePath "$ARCHIVE" \
-  -allowProvisioningUpdates \
+  -allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"} \
   MARKETING_VERSION="$MKT" CURRENT_PROJECT_VERSION="$BUILD" \
   >"$WORK/archive.log" 2>&1 || { echo "✗ archive failed — see $WORK/archive.log"; tail -20 "$WORK/archive.log"; exit 1; }
 
 echo "▶ [2/4] Exporting App Store .ipa…"
 xcodebuild -exportArchive \
   -archivePath "$ARCHIVE" -exportOptionsPlist "$EXPORT_OPTS" \
-  -exportPath "$EXPORT_DIR" -allowProvisioningUpdates \
+  -exportPath "$EXPORT_DIR" -allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"} \
   >"$WORK/export.log" 2>&1 || { echo "✗ export failed — see $WORK/export.log"; tail -20 "$WORK/export.log"; exit 1; }
 
 IPA_SRC="$EXPORT_DIR/SGSujood.ipa"
