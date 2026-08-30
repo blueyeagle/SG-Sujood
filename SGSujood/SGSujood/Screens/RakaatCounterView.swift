@@ -39,6 +39,7 @@ struct RakaatCounterView: View {
                 CameraPreview(session: cam.session)
                     .overlay(SkeletonOverlay(points: cam.overlayPoints))
                     .overlay(alignment: .topLeading) { posturePill.padding(10) }
+                    .overlay(alignment: .topTrailing) { flipButton.padding(10) }
                     .overlay(alignment: .bottomLeading) { framingHint.padding(10) }
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -66,6 +67,20 @@ struct RakaatCounterView: View {
             .foregroundStyle(.white)
             .padding(.horizontal, 12).padding(.vertical, 6)
             .background(Capsule().fill(color))
+    }
+
+    private var flipButton: some View {
+        Button { cam.flipCamera() } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.triangle.2.circlepath.camera")
+                    .font(.system(size: 13, weight: .semibold))
+                Text(cam.usingFront ? "Front" : "Wide")
+                    .font(Font2.condensed(13))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10).padding(.vertical, 6)
+            .background(Capsule().fill(Color.black.opacity(0.55)))
+        }
     }
 
     @ViewBuilder private var framingHint: some View {
@@ -107,10 +122,32 @@ struct RakaatCounterView: View {
     // MARK: Counters
 
     private var counters: some View {
-        HStack(spacing: Space.s3) {
-            stat("Sujud", cam.sujudCount, Palette.success)
-            stat("Stand-ups", cam.standUps, Palette.accent700)
-            stat("Rak'ah", cam.rakaat, Palette.text)
+        VStack(spacing: Space.s3) {
+            // Hero: total rak'ah completed so far — big enough to read at a glance from your mat,
+            // so you can check where you are if you lose track.
+            VStack(spacing: 0) {
+                Text("\(cam.rakaat)")
+                    .font(Font2.condensed(104))
+                    .foregroundStyle(Palette.accent)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                Text("rak'ah completed")
+                    .font(Font2.condensed(18))
+                    .foregroundStyle(Palette.text)
+                Text("counts after the 2nd sujud of each rak'ah")
+                    .font(Font2.body(11.5))
+                    .foregroundStyle(Palette.mutedInk)
+                    .padding(.top, 2)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, Space.s4)
+            .blueprint()
+
+            HStack(spacing: Space.s3) {
+                stat("Sujud", cam.sujudCount, Palette.success)
+                stat("Stand-ups", cam.standUps, Palette.accent700)
+            }
         }
     }
 
@@ -158,7 +195,9 @@ struct RakaatCounterView: View {
                 .font(Font2.condensed(16))
                 .foregroundStyle(Palette.text)
             ForEach([
-                "Prop the phone to your side, ~2–3 m away, so your whole body is visible.",
+                "Place the phone in front of you, tilted up, so your whole body — head to the floor — stays in view. A little elevation (on a low stand) helps.",
+                "Tap Front / Wide (top-right): the front camera lets you see yourself (~1.5–2 m); the Wide back lens fits you in from ~1 m — set it up, then face it (screen away).",
+                "A slight side angle makes ruku' vs. sujud clearest, but front works for counting.",
                 "Good, even lighting improves detection.",
                 "Rak'ah is estimated as sujud ÷ 2. This is a prototype — verify your count.",
             ], id: \.self) { t in

@@ -45,11 +45,18 @@ final class PoseCamera: NSObject, ObservableObject {
 
     var rakaat: Int { sujudCount / 2 }
 
+    /// Front camera lets you see yourself while positioning; the back ultra-wide lens is far
+    /// wider, so you can place the phone right in front of you (~1 m) instead of metres away.
+    @Published private(set) var usingFront = true
+
     let session = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "sgsujood.posecamera.session")
     private let videoQueue = DispatchQueue(label: "sgsujood.posecamera.video")
     private let output = AVCaptureVideoDataOutput()
     private var configured = false
+    private var currentInput: AVCaptureDeviceInput?
+    /// Read on the video queue; mirror x only for the (mirrored) front camera.
+    nonisolated(unsafe) private var mirrorX = true
 
     // Posture debounce: only commit a new posture after it holds for a few frames.
     private var candidate: Posture = .unknown
@@ -62,13 +69,13 @@ final class PoseCamera: NSObject, ObservableObject {
         authorization = AVCaptureDevice.authorizationStatus(for: .video)
         switch authorization {
         case .authorized:
-            configureAndRun()
+            configureAndRun(front: usingFront)
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                 Task { @MainActor in
                     guard let self else { return }
                     self.authorization = granted ? .authorized : .denied
-                    if granted { self.configureAndRun() }
+                    if granted { self.configureAndRun(front: self.usingFront) }
                 }
             }
         default:
@@ -92,34 +99,69 @@ final class PoseCamera: NSObject, ObservableObject {
         candidateFrames = 0
     }
 
-    // MARK: Session setup
-
-    private func configureAndRun() {
+    /// Switch between the front camera (see yourself) and the wide back camera (place closer).
+    func flipCamera() {
+        usingFront.toggle()
+        mirrorX = usingFront
+        let front = usingFront
         sessionQueue.async { [weak self] in
             guard let self else { return }
+            self.session.beginConfiguration()
+            self.applyInputLocked(front: front)
+            self.orientPortrait()
+            self.session.commitConfiguration()
+        }
+    }
+
+    // MARK: Session setup
+
+    private func configureAndRun(front: Bool) {
+        mirrorX = front
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            self.session.beginConfiguration()
             if !self.configured {
-                self.session.beginConfiguration()
                 self.session.sessionPreset = .high
-
-                if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
-                   let input = try? AVCaptureDeviceInput(device: device),
-                   self.session.canAddInput(input) {
-                    self.session.addInput(input)
-                }
-
                 self.output.alwaysDiscardsLateVideoFrames = true
                 self.output.setSampleBufferDelegate(self, queue: self.videoQueue)
                 if self.session.canAddOutput(self.output) { self.session.addOutput(self.output) }
-
-                if let conn = self.output.connection(with: .video) {
-                    if conn.isVideoRotationAngleSupported(90) { conn.videoRotationAngle = 90 } // portrait
-                }
-                self.session.commitConfiguration()
                 self.configured = true
             }
+            self.applyInputLocked(front: front)
+            self.orientPortrait()
+            self.session.commitConfiguration()
             if !self.session.isRunning { self.session.startRunning() }
             Task { @MainActor in self.isRunning = self.session.isRunning }
         }
+    }
+
+    /// (Re)attach the camera input for the chosen side. Must run inside a begin/commit block.
+    private func applyInputLocked(front: Bool) {
+        if let existing = currentInput {
+            session.removeInput(existing)
+            currentInput = nil
+        }
+        guard let device = Self.bestDevice(front: front),
+              let input = try? AVCaptureDeviceInput(device: device),
+              session.canAddInput(input) else { return }
+        session.addInput(input)
+        currentInput = input
+    }
+
+    private func orientPortrait() {
+        if let conn = output.connection(with: .video), conn.isVideoRotationAngleSupported(90) {
+            conn.videoRotationAngle = 90
+        }
+    }
+
+    /// Front: the selfie wide lens. Back: prefer the ULTRA-WIDE lens (much larger field of view,
+    /// so the phone can sit ~1 m in front and still frame you head-to-floor), else the wide lens.
+    private static func bestDevice(front: Bool) -> AVCaptureDevice? {
+        if front {
+            return AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
+        }
+        return AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back)
+            ?? AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
     }
 
     // MARK: Classification
@@ -166,7 +208,7 @@ final class PoseCamera: NSObject, ObservableObject {
     /// Map Vision points (y up, origin bottom-left) to overlay space (y down, origin top-left)
     /// and mirror x to match the mirrored front-camera preview.
     private nonisolated func mirrored(_ pts: [VNHumanBodyPoseObservation.JointName: CGPoint]) -> [CGPoint] {
-        pts.values.map { CGPoint(x: 1 - $0.x, y: 1 - $0.y) }
+        pts.values.map { CGPoint(x: mirrorX ? 1 - $0.x : $0.x, y: 1 - $0.y) }
     }
 
     private func commit(_ p: Posture) {
