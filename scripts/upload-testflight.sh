@@ -19,8 +19,9 @@ IPA="${1:-}"
 # altool auto-discovers the key at ~/.appstoreconnect/private_keys/AuthKey_<KEYID>.p8
 KEYDIR="$HOME/.appstoreconnect/private_keys"
 mkdir -p "$KEYDIR"
-if [ -n "${ASC_KEY_P8:-}" ] && [ -f "$ASC_KEY_P8" ]; then
-  cp -f "$ASC_KEY_P8" "$KEYDIR/AuthKey_${ASC_KEY_ID}.p8"
+DEST_P8="$KEYDIR/AuthKey_${ASC_KEY_ID}.p8"
+if [ -n "${ASC_KEY_P8:-}" ] && [ -f "$ASC_KEY_P8" ] && [ ! "$ASC_KEY_P8" -ef "$DEST_P8" ]; then
+  cp -f "$ASC_KEY_P8" "$DEST_P8"
 fi
 [ -f "$KEYDIR/AuthKey_${ASC_KEY_ID}.p8" ] || {
   echo "Missing $KEYDIR/AuthKey_${ASC_KEY_ID}.p8 — set ASC_KEY_P8 to your downloaded .p8 path."; exit 1; }
